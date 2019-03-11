@@ -2,16 +2,16 @@ const db = require('../../config/db');
 
 exports.insert = function(username, email, given_name, family_name, password, done) {
     let values = [username, email, given_name, family_name, password];
-    
+
     if (!isValidEmail(email)) {
         done(400, {"Validation Error": "Invalid email address"})
+    } else {
+        db.getPool().query('INSERT INTO User (username, email, given_name, family_name, password) VALUES ?', [[values]], function(err, result) {
+            if (err) return done(400, err);
+    
+            done(201, {"userId": result.insertId});
+        });
     }
-
-    db.getPool().query('INSERT INTO User (username, email, given_name, family_name, password) VALUES ?', [values], function(err, result) {
-        if (err) return done(400, err);
-
-        done(201, {"userId": result.insertId});
-    });
 };
 
 function isValidEmail(email) {
