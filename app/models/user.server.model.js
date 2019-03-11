@@ -1,5 +1,6 @@
 const db = require('../../config/db');
 const bcrypt = require('bcrypt');
+const uuidv1 = require('uuid/v1');
 
 exports.insert = function(username, email, givenName, familyName, password, done) {
 
@@ -35,9 +36,10 @@ function hashPassword(password) {
 exports.getOne = function(userId, done) {
     db.getPool().query('SELECT * FROM User WHERE user_id = ?', userId, function (err, rows) {
         // TODO: Consider using different status code here.
-        if (err) return done(404, err);
-        else if (rows.length == 0) {
-            done(404, {"Error": 'User not found.'});
+        if (err) {
+            done(404, err);
+        } else if (rows.length == 0) {
+            done(404, {"Error": 'User not found'});
         } else if (rows.length > 1) {
             done(404, {"Error": 'More than one user found. This should never occur!'})
         } else {
@@ -53,3 +55,37 @@ exports.getOne = function(userId, done) {
         
     });
 };
+
+
+exports.authenticateWithUsername = function(username, password, done) {
+    authenticate({username: username}, password, done);
+}
+
+exports.authenticateWithEmail = function(email, password, done) {
+    authenticate({email: email}, password, done);
+}
+
+function authenticate(uniqueSelectCondition, password, done) {
+    db.getPool().query('SELECT * FROM User WHERE ?', uniqueSelectCondition, function (err, rows) {
+        if (err) {
+            done(400, err);
+        }  else if (rows.length == 0) {
+            done(400, {"Error": 'User not found'});
+        } else if (rows.length > 1) {
+            done(400, {"Error": 'More than one user found. This should never occur!'})
+        } else {
+            passwordHash = rows[0].password;
+
+            if (bcrypt.compareSync(password, passwordHash)) {
+                let token = uuidv1();
+                result = {
+                    "userId": rows[0].user_id,
+                    "token": token
+                }
+                done(200, result);
+            } else {
+                done(400, {"Authentication Error": "Incorrect username or password"});
+            }
+        }
+    });
+}

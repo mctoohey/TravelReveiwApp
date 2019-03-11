@@ -24,3 +24,20 @@ exports.read = function(req, res) {
     });
 };
 
+exports.login = function(req, res) {
+    if (req.body.hasOwnProperty('username')) {
+        User.authenticateWithUsername(req.body.username, req.body.password, function(code, result) {
+            res.status(code);
+            res.json(result);
+        });
+    } else if (req.body.hasOwnProperty('email')) {
+        User.authenticateWithEmail(req.body.email, req.body.password, function(code, result) {
+            res.status(code);
+            res.json(result);
+        });
+    } else {
+        res.status(400);
+        res.json({"Error": "No username or email supplied"});
+    }
+}
+
