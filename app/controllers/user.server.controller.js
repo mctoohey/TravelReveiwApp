@@ -5,7 +5,7 @@ exports.create = function(req, res) {
         [req.body.username, req.body.email, req.body.givenName, req.body.familyName, req.body.password]
     ];
 
-    User.insert(values, function(code, result) {
+    User.insert(...values, function(code, result) {
         res.status(code);
         res.json(result);
     });
