@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const uuidv1 = require('uuid/v1');
 
 exports.insert = function(username, email, givenName, familyName, password, done) {
-
+    // TODO: Check that all fields are valid.
     if (!isValidEmail(email)) {
         done(400, {"Validation Error": "Invalid email address"});
     } else if (!isValidPassword(password)) {
@@ -78,11 +78,18 @@ function authenticate(uniqueSelectCondition, password, done) {
 
             if (bcrypt.compareSync(password, passwordHash)) {
                 let token = uuidv1();
-                result = {
+                authResult = {
                     "userId": rows[0].user_id,
                     "token": token
                 }
-                done(200, result);
+
+                db.getPool().query('UPDATE User SET auth_token = ? WHERE user_id = ?', [authResult.token, authResult.userId], function(err, result) {
+                    if (err) {
+                        done(400, err);
+                    } else {
+                        done(200, authResult);
+                    }
+                });
             } else {
                 done(400, {"Authentication Error": "Incorrect username or password"});
             }
