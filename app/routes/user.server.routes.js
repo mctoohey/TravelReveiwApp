@@ -3,4 +3,7 @@ module.exports = function(app) {
 app.route('/api/v1/users')
         //.get(users.list)
         .post(user.create);
+
+app.route('/api/v1/users/:userId')
+        .get(user.read);
 };

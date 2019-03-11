@@ -14,4 +14,13 @@ exports.create = function(req, res) {
         res.status(code);
         res.json(result);
     });
+}
+
+exports.read = function(req, res) {
+    let id = req.params.userId;
+    User.getOne(id, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
 };
+
