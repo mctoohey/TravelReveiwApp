@@ -41,3 +41,11 @@ exports.login = function(req, res) {
     }
 }
 
+exports.logout = function(req, res) {
+    let token = req.headers['x-authorization'];
+    User.logout(token, function() {
+        res.status(code);
+        res.json(result);
+    });
+}
+

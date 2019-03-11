@@ -9,5 +9,8 @@ app.route('/api/v1/users/:userId')
 
 app.route('/api/v1/users/login')
         .post(user.login);
-};
+
+app.route('/api/v1/users/logout')
+        .post(user.logout);
+}
 

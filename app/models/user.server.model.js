@@ -96,3 +96,19 @@ function authenticate(uniqueSelectCondition, password, done) {
         }
     });
 }
+
+
+exports.logout = function(token, done) {
+    db.getPool().query('UPDATE User SET auth_token = null WHERE auth_token = ?', token, function(err, rows) {
+        if (err) {
+            done(401, err);
+        } else if (rows.length == 0) {
+            done(401, {"Error": "Token not found"});
+        } else if (rows.length > 1) {
+            // Should users still be logged out here?
+            done(401, {"Error": "Token should be unique to one user"});
+        } else {
+            done(200, {})
+        }
+    });
+}
