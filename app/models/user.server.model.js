@@ -12,11 +12,23 @@ exports.insert = function(username, email, givenName, familyName, password, done
         let values = [username, email, givenName, familyName, hashPassword(password)];
 
         db.getPool().query('INSERT INTO User (username, email, given_name, family_name, password) VALUES ?', [[values]], function(err, result) {
-            if (err) return done(400, err);
-    
-            done(201, {"userId": result.insertId});
+            if (err) {
+                done(400, err);
+            } else {
+                done(201, {"userId": result.insertId});
+            }
         });
     }
+}
+
+exports.update = function(id, updatedInfo, done) {
+    db.getPool().query('UPDATE User SET ? WHERE user_id = ?', [updatedInfo, id], function(err, result) {
+        if (err) {
+            done(400, err);
+        } else {
+            done(200, {});
+        }
+    });
 }
 
 function isValidEmail(email) {

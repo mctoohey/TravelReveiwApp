@@ -16,6 +16,24 @@ exports.create = function(req, res) {
     });
 }
 
+exports.edit = function(req, res) {
+    let id = req.params.userId;
+    let updateInfo = {}
+    if (req.body.hasOwnProperty('givenName')) {
+        updateInfo["given_name"] = req.body.givenName;
+    }
+    if (req.body.hasOwnProperty('familyName')) {
+        updateInfo["family_name"] = req.body.familyName;
+    }
+    if (req.body.hasOwnProperty('password')) {
+        updateInfo["password"] = req.body.password;
+    }
+    User.update(id, updateInfo, function (code, result){
+        res.status(code);
+        res.json(result);
+    });
+}
+
 exports.read = function(req, res) {
     let id = req.params.userId;
     let token = '';
