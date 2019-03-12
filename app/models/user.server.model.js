@@ -33,7 +33,7 @@ function hashPassword(password) {
 }
 
 
-exports.getOne = function(userId, done) {
+exports.getOne = function(userId, token, done) {
     db.getPool().query('SELECT * FROM User WHERE user_id = ?', userId, function (err, rows) {
         // TODO: Consider using different status code here.
         if (err) {
@@ -45,10 +45,10 @@ exports.getOne = function(userId, done) {
         } else {
             userData = {
                 "username": rows[0].username,
-                "email": rows[0].email,
                 "givenName": rows[0].given_name,
                 "familyName": rows[0].family_name
             }
+            if (rows[0].auth_token === token) userData["email"] = rows[0].email;
 
             done(200, userData);
         }

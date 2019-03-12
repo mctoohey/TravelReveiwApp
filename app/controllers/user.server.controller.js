@@ -18,7 +18,12 @@ exports.create = function(req, res) {
 
 exports.read = function(req, res) {
     let id = req.params.userId;
-    User.getOne(id, function(code, result) {
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+
+    User.getOne(id, token, function(code, result) {
         res.status(code);
         res.json(result);
     });

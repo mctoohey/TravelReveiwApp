@@ -23,7 +23,7 @@ CREATE TABLE User
      given_name             VARCHAR(128) NOT NULL,
      family_name            VARCHAR(128) NOT NULL,
      password               VARCHAR(256) NOT NULL COMMENT 'Only store the hash here, not actual password!',
-     auth_token             VARCHAR(32),
+     auth_token             VARCHAR(64),
      profile_photo_filename VARCHAR(128),
      PRIMARY KEY (user_id),
      UNIQUE (username),
