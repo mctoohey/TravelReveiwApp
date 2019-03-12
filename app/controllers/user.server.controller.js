@@ -18,6 +18,11 @@ exports.create = function(req, res) {
 
 exports.edit = function(req, res) {
     let id = req.params.userId;
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+
     let updateInfo = {}
     if (req.body.hasOwnProperty('givenName')) {
         updateInfo["given_name"] = req.body.givenName;
@@ -28,7 +33,8 @@ exports.edit = function(req, res) {
     if (req.body.hasOwnProperty('password')) {
         updateInfo["password"] = req.body.password;
     }
-    User.update(id, updateInfo, function (code, result){
+    
+    User.update(id, token, updateInfo, function (code, result){
         res.status(code);
         res.json(result);
     });

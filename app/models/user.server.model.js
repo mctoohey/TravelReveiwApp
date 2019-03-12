@@ -21,14 +21,19 @@ exports.insert = function(username, email, givenName, familyName, password, done
     }
 }
 
-exports.update = function(id, updatedInfo, done) {
-    db.getPool().query('UPDATE User SET ? WHERE user_id = ?', [updatedInfo, id], function(err, result) {
-        if (err) {
-            done(400, err);
-        } else {
-            done(200, {});
-        }
-    });
+exports.update = function(id, token, updatedInfo, done) {
+    if (this.isAuthorized(id, token)) {
+        db.getPool().query('UPDATE User SET ? WHERE user_id = ?', [updatedInfo, id], function(err, result) {
+            if (err) {
+                done(400, err);
+            } else {
+                done(200, {});
+            }
+        });
+    } else {
+        done(403, {});
+    }
+    
 }
 
 function isValidEmail(email) {
@@ -109,6 +114,19 @@ function authenticate(uniqueSelectCondition, password, done) {
     });
 }
 
+exports.isAuthorized = function(id, token) {
+    let isValidToken = false;
+    db.getPool().query('SELECT * FROM User WHERE auth_token = ? and user_id = ?', [token, id], function(err, rows) {
+        if (err) {
+            isValidToken = false;
+        } else if (rows.length === 1) {
+            isValidToken = true;
+        }
+        console.log(isValidToken);
+        console.log(rows);
+    });
+    return isValidToken;
+}
 
 exports.logout = function(token, done) {
     db.getPool().query('UPDATE User SET auth_token = null WHERE auth_token = ?', token, function(err, result) {
