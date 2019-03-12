@@ -69,7 +69,7 @@ function authenticate(uniqueSelectCondition, password, done) {
     db.getPool().query('SELECT * FROM User WHERE ?', uniqueSelectCondition, function (err, rows) {
         if (err) {
             done(400, err);
-        }  else if (rows.length == 0) {
+        }  else if (rows.length === 0) {
             done(400, {"Error": 'User not found'});
         } else if (rows.length > 1) {
             done(400, {"Error": 'More than one user found. This should never occur!'})
@@ -99,16 +99,16 @@ function authenticate(uniqueSelectCondition, password, done) {
 
 
 exports.logout = function(token, done) {
-    db.getPool().query('UPDATE User SET auth_token = null WHERE auth_token = ?', token, function(err, rows) {
+    db.getPool().query('UPDATE User SET auth_token = null WHERE auth_token = ?', token, function(err, result) {
         if (err) {
             done(401, err);
-        } else if (rows.length == 0) {
+        } else if (result.affectedRows === 0) {
             done(401, {"Error": "Token not found"});
-        } else if (rows.length > 1) {
+        } else if (result.affectedRows > 1) {
             // Should users still be logged out here?
             done(401, {"Error": "Token should be unique to one user"});
         } else {
-            done(200, {})
+            done(200, {});
         }
     });
 }

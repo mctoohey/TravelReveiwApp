@@ -43,7 +43,7 @@ exports.login = function(req, res) {
 
 exports.logout = function(req, res) {
     let token = req.headers['x-authorization'];
-    User.logout(token, function() {
+    User.logout(token, function(code, result) {
         res.status(code);
         res.json(result);
     });
