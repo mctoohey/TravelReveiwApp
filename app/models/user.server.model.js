@@ -22,11 +22,13 @@ exports.insert = function(username, email, givenName, familyName, password, done
 }
 
 exports.update = function(id, token, updatedInfo, done) {
-    db.getPool().query('SELECT * FROM User WHERE auth_token = ? and user_id = ?', [token, id], function(err, rows) {
+    db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
         if (err) {
             done(400, err);
         } else if (rows.length != 1) {
             done(401, {});
+        } else if (rows[0].user_id != id) {
+            done(403, {})
         } else {
             db.getPool().query('UPDATE User SET ? WHERE user_id = ?', [updatedInfo, id], function(err, result) {
                 if (err) {
