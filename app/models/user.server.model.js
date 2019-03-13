@@ -221,7 +221,7 @@ exports.deletePhoto = function(id, token, done) {
         } else if (rows[0].auth_token != token) {
             done(401, {"ERROR": "Supplied token is not valid to alter this users photo"});
         } else if (rows[0].profile_photo_filename === null) {
-            doneError(404, {"ERROR": "Image not found"});
+            done(404, {"ERROR": "Image not found"});
         } else {
             db.getPool().query('UPDATE User SET profile_photo_filename = null WHERE user_id = ?', id, function(err, result) {
                 if (err) {
