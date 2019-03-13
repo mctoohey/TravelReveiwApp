@@ -1,6 +1,7 @@
 const db = require('../../config/db');
 const bcrypt = require('bcrypt');
 const uuidv1 = require('uuid/v1');
+const fs = require('fs'); 
 
 exports.insert = function(username, email, givenName, familyName, password, done) {
     // TODO: Check that all fields are valid.
@@ -145,6 +146,38 @@ exports.logout = function(token, done) {
             done(401, {"Error": "Token should be unique to one user"});
         } else {
             done(200, {});
+        }
+    });
+}
+
+exports.addPhoto = function(id, token, imageName, imageRaw, done) {
+    db.getPool().query('SELECT * FROM User WHERE user_id = ? or auth_token = ?', [id, token], function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else if (rows.length === 0) {
+            done(404, {"ERROR": "User not found"});
+        } else if (rows.length === 2) {
+            done(403, {"ERROR": "You are not allowed to change this users photo"});
+        } else if (rows.length > 2) {
+            done(500, {"ERROR": "Either user id or auth token was not unique"});
+        } else if (rows[0].user_id != id || rows[0].auth_token != token) {
+            done(401, {"ERROR": "Supplied token is not valid to alter this users photo"});
+        } else {
+            fs.writeFile(`user_photos/${imageName}`, imageRaw, function (err) {
+                if (err) {
+                    done(500, {"ERROR": "Could not save image"});
+                } else {
+                    let statusCode = 200;
+                    if (rows[0].profile_photo_filename === null) statusCode = 201;
+                    db.getPool().query('UPDATE User SET profile_photo_filename = ? WHERE user_id = ?', [imageName, id], function(err, result) {
+                        if (err) {
+                            done(500, err);
+                        } else {
+                            done(statusCode, {});
+                        }
+                    });
+                }
+            });
         }
     });
 }
