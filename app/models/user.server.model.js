@@ -147,7 +147,7 @@ exports.addPhoto = function(id, token, imageName, imageRaw, done) {
         } else if (rows[0].user_id != id) {
             done(404, {"ERROR": "User not found"});
         } else if (rows[0].auth_token != token) {
-            done(401, {"ERROR": "Supplied token is not valid to alter this users photo"});
+            done(401, {"ERROR": "Supplied token is not valid"});
         } else {
             fs.writeFile(`user_photos/${imageName}`, imageRaw, function (err) {
                 if (err) {
@@ -203,7 +203,7 @@ exports.deletePhoto = function(id, token, done) {
         } else if (rows[0].user_id != id) {
             done(404, {"ERROR": "User not found"});
         } else if (rows[0].auth_token != token) {
-            done(401, {"ERROR": "Supplied token is not valid to alter this users photo"});
+            done(401, {"ERROR": "Supplied token is not valid"});
         } else if (rows[0].profile_photo_filename === null) {
             done(404, {"ERROR": "Image not found"});
         } else {
