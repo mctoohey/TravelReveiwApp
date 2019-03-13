@@ -126,6 +126,19 @@ exports.getPhoto = function(req, res) {
     });
 }
 
+exports.deletePhoto = function(req, res) {
+    let id = req.params.userId;
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+
+    User.deletePhoto(id, token, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
+}
+
 function isValidPassword(password) {
     return password.length > 0;
 }

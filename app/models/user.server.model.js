@@ -205,3 +205,35 @@ exports.getPhoto = function(id, doneError, doneImage) {
         }
     });
 }
+
+exports.deletePhoto = function(id, token, done) {
+    db.getPool().query('SELECT * FROM User WHERE user_id = ? or auth_token = ?', [id, token], function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else if (rows.length === 0) {
+            done(404, {"ERROR": "User not found"});
+        } else if (rows.length === 2) {
+            done(403, {"ERROR": "You are not allowed to change this users photo"});
+        } else if (rows.length > 2) {
+            done(500, {"ERROR": "Either user id or auth token was not unique"});
+        } else if (rows[0].user_id != id) {
+            done(404, {"ERROR": "User not found"});
+        } else if (rows[0].auth_token != token) {
+            done(401, {"ERROR": "Supplied token is not valid to alter this users photo"});
+        } else {
+            db.getPool().query('UPDATE User SET profile_photo_filename = null WHERE user_id = ?', id, function(err, result) {
+                if (err) {
+                    done(500, err);
+                } else {
+                    try {
+                        fs.unlinkSync(`user_photos/${rows[0].profile_photo_filename}`);
+                        done(200, {});
+                    } catch(err) {
+                        done(500, err);
+                    }
+                    
+                }
+            });
+        }
+    });
+}

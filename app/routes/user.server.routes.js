@@ -15,6 +15,7 @@ app.route('/api/v1/users/logout')
 
 app.route('/api/v1/users/:userId/photo')
         .put(user.addPhoto)
-        .get(user.getPhoto);
+        .get(user.getPhoto)
+        .delete(user.deletePhoto);
 }
 
