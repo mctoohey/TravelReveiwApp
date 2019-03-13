@@ -4,22 +4,16 @@ const uuidv1 = require('uuid/v1');
 const fs = require('fs'); 
 
 exports.insert = function(username, email, givenName, familyName, password, done) {
-    // TODO: Check that all fields are valid.
-    if (!isValidEmail(email)) {
-        done(400, {"Validation Error": "Invalid email address"});
-    } else if (!isValidPassword(password)) {
-        done(400, {"Validation Error": "Invalid password"});
-    } else {
-        let values = [username, email, givenName, familyName, hashPassword(password)];
+    
+    let values = [username, email, givenName, familyName, hashPassword(password)];
 
-        db.getPool().query('INSERT INTO User (username, email, given_name, family_name, password) VALUES ?', [[values]], function(err, result) {
-            if (err) {
-                done(400, err);
-            } else {
-                done(201, {"userId": result.insertId});
-            }
-        });
-    }
+    db.getPool().query('INSERT INTO User (username, email, given_name, family_name, password) VALUES ?', [[values]], function(err, result) {
+        if (err) {
+            done(400, err);
+        } else {
+            done(201, {"userId": result.insertId});
+        }
+    });
 }
 
 exports.update = function(id, token, updatedInfo, done) {
@@ -43,20 +37,6 @@ exports.update = function(id, token, updatedInfo, done) {
         
 
 }
-
-function isValidEmail(email) {
-    var emailRe = /[a-zA-Z0-9!#$%&'*+-/=?^_`{|}~.]+@[a-zA-z0-9-.]+/;
-    return emailRe.test(email);
-}
-
-function isValidPassword(password) {
-    return password.length > 0;
-}
-
-function hashPassword(password) {
-    return bcrypt.hashSync(password, 12);
-}
-
 
 exports.getOne = function(userId, token, done) {
     db.getPool().query('SELECT * FROM User WHERE user_id = ?', userId, function (err, rows) {
@@ -233,7 +213,6 @@ exports.deletePhoto = function(id, token, done) {
                     } catch(err) {
                         done(500, err);
                     }
-                    
                 }
             });
         }

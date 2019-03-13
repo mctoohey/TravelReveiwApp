@@ -1,19 +1,26 @@
 const User = require('../models/user.server.model');
 
 exports.create = function(req, res) {
-    // let values = [
-    //     [req.body.username, req.body.email, req.body.givenName, req.body.familyName, req.body.password]
-    // ];
-
-    User.insert(req.body.username, 
-                req.body.email, 
-                req.body.givenName, 
-                req.body.familyName, 
-                req.body.password, 
-                function(code, result) {
-        res.status(code);
-        res.json(result);
-    });
+    // TODO: Check that all fields are valid.
+    if (!isValidEmail(req.body.email)) {
+        done(400, {"Validation Error": "Invalid email address"});
+    } else if (!isValidPassword(req.body.password)) {
+        done(400, {"Validation Error": "Invalid password"});
+    } else if (!isValidName(req.body.givenName)) {
+        done(400, {"Validation Error": "Invalid given name"});
+    } else if (!isValidName(req.body.familyName)) {
+        done(400, {"Validation Error": "Invalid family name"});
+    } else {
+        User.insert(req.body.username, 
+                    req.body.email, 
+                    req.body.givenName, 
+                    req.body.familyName, 
+                    req.body.password, 
+                    function(code, result) {
+            res.status(code);
+            res.json(result);
+        });
+    }
 }
 
 exports.edit = function(req, res) {
@@ -139,8 +146,17 @@ exports.deletePhoto = function(req, res) {
     });
 }
 
+function isValidEmail(email) {
+    var emailRe = /[a-zA-Z0-9!#$%&'*+-/=?^_`{|}~.]+@[a-zA-z0-9-.]+/;
+    return emailRe.test(email);
+}
+
 function isValidPassword(password) {
     return password.length > 0;
+}
+
+function hashPassword(password) {
+    return bcrypt.hashSync(password, 12);
 }
 
 function isValidName(name) {
