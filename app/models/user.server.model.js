@@ -160,7 +160,9 @@ exports.addPhoto = function(id, token, imageName, imageRaw, done) {
             done(403, {"ERROR": "You are not allowed to change this users photo"});
         } else if (rows.length > 2) {
             done(500, {"ERROR": "Either user id or auth token was not unique"});
-        } else if (rows[0].user_id != id || rows[0].auth_token != token) {
+        } else if (rows[0].user_id != id) {
+            done(404, {"ERROR": "User not found"});
+        } else if (rows[0].auth_token != token) {
             done(401, {"ERROR": "Supplied token is not valid to alter this users photo"});
         } else {
             fs.writeFile(`user_photos/${imageName}`, imageRaw, function (err) {
