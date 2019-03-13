@@ -1,20 +1,28 @@
 const User = require('../models/user.server.model');
-const fs = require('fs'); 
 
 exports.create = function(req, res) {
-    // let values = [
-    //     [req.body.username, req.body.email, req.body.givenName, req.body.familyName, req.body.password]
-    // ];
-
-    User.insert(req.body.username, 
-                req.body.email, 
-                req.body.givenName, 
-                req.body.familyName, 
-                req.body.password, 
-                function(code, result) {
-        res.status(code);
-        res.json(result);
-    });
+    // TODO: Check that all fields are valid.
+    if (!isValidEmail(req.body.email)) {
+        res.status(400).json({"Validation Error": "Invalid email address"});
+    } else if (!isValidUserName(req.body.username)) {
+        res.status(400).json({"Validation Error": "Invalid user name"});
+    } else if (!isValidPassword(req.body.password)) {
+        res.status(400).json({"Validation Error": "Invalid password"});
+    } else if (!isValidName(req.body.givenName)) {
+        res.status(400).json({"Validation Error": "Invalid given name"});
+    } else if (!isValidName(req.body.familyName)) {
+        res.status(400).json({"Validation Error": "Invalid family name"});
+    } else {
+        User.insert(req.body.username, 
+                    req.body.email, 
+                    req.body.givenName, 
+                    req.body.familyName, 
+                    req.body.password, 
+                    function(code, result) {
+            res.status(code);
+            res.json(result);
+        });
+    }
 }
 
 exports.edit = function(req, res) {
@@ -82,7 +90,10 @@ exports.login = function(req, res) {
 }
 
 exports.logout = function(req, res) {
-    let token = req.headers['x-authorization'];
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
     User.logout(token, function(code, result) {
         res.status(code);
         res.json(result);
@@ -91,32 +102,66 @@ exports.logout = function(req, res) {
 
 exports.addPhoto = function(req, res) {
     let id = req.params.userId;
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
     let imageType = req.headers['content-type'];
-    let Extension = null;
-    console.log(req.body);
-    if (imageType === 'image/png') {
-        fs.writeFile(`user_photos/${id}.png`, req.body, function (err) {
-            if (err) {
-                res.status(500);
-                res.json({ERROR: `Could not save file`});
-            } else {
-                res.status(200);
-                res.json({});
-            }
-        });
-    } else if (imageType === 'image/jpeg') {
+    let imageName = null;
 
+    if (imageType === 'image/png') imageName = `${id}.png`;
+    else if (imageType === 'image/jpeg') imageName = `${id}.jpeg`;
+
+    if (imageName != null) {
+        User.addPhoto(id, token, imageName, req.body, function(code, result) {
+            res.status(code);
+            res.json(result);
+        });
     } else {
         res.status(400);
-        res.json({ERROR: `Content type '${imageType}' is not supported`});
+        res.json({"ERROR": `Content type '${imageType}' is not supported`});
     }
 }
 
+exports.getPhoto = function(req, res) {
+    let id = req.params.userId;
+    User.getPhoto(id, function(code, result) {
+        res.status(code);
+        res.json(result);
+    }, function(code, image) {
+        res.status(code);
+        res.setHeader("Content-Type", "image/png");
+        res.end(image);
+    });
+}
+
+exports.deletePhoto = function(req, res) {
+    let id = req.params.userId;
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+
+    User.deletePhoto(id, token, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
+}
+
+function isValidEmail(email) {
+    var emailRe = /[a-zA-Z0-9!#$%&'*+-/=?^_`{|}~.]+@[a-zA-z0-9-.]+/;
+    return (typeof email === "string") && emailRe.test(email) && email.length > 0;
+}
+
 function isValidPassword(password) {
-    return password.length > 0;
+    return (typeof password === "string") && password.length > 0;
 }
 
 function isValidName(name) {
-    return name.length > 0;
+    return (typeof name === "string") && name.length > 0;
+}
+
+function isValidUserName(userName) {
+    return (typeof userName === "string") && userName.length > 0;
 }
 
