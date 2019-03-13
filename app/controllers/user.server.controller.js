@@ -81,7 +81,10 @@ exports.login = function(req, res) {
 }
 
 exports.logout = function(req, res) {
-    let token = req.headers['x-authorization'];
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
     User.logout(token, function(code, result) {
         res.status(code);
         res.json(result);
@@ -90,7 +93,10 @@ exports.logout = function(req, res) {
 
 exports.addPhoto = function(req, res) {
     let id = req.params.userId;
-    let token = req.headers['x-authorization'];
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
     let imageType = req.headers['content-type'];
     let imageName = null;
 
