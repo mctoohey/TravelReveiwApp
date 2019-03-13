@@ -1,4 +1,5 @@
 const User = require('../models/user.server.model');
+const fs = require('fs'); 
 
 exports.create = function(req, res) {
     // let values = [
@@ -86,6 +87,29 @@ exports.logout = function(req, res) {
         res.status(code);
         res.json(result);
     });
+}
+
+exports.addPhoto = function(req, res) {
+    let id = req.params.userId;
+    let imageType = req.headers['content-type'];
+    let Extension = null;
+    console.log(req.body);
+    if (imageType === 'image/png') {
+        fs.writeFile(`user_photos/${id}.png`, req.body, function (err) {
+            if (err) {
+                res.status(500);
+                res.json({ERROR: `Could not save file`});
+            } else {
+                res.status(200);
+                res.json({});
+            }
+        });
+    } else if (imageType === 'image/jpeg') {
+
+    } else {
+        res.status(400);
+        res.json({ERROR: `Content type '${imageType}' is not supported`});
+    }
 }
 
 function isValidPassword(password) {
