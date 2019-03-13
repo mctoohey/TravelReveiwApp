@@ -4,6 +4,8 @@ exports.create = function(req, res) {
     // TODO: Check that all fields are valid.
     if (!isValidEmail(req.body.email)) {
         res.status(400).json({"Validation Error": "Invalid email address"});
+    } else if (!isValidUserName(req.body.username)) {
+        res.status(400).json({"Validation Error": "Invalid user name"});
     } else if (!isValidPassword(req.body.password)) {
         res.status(400).json({"Validation Error": "Invalid password"});
     } else if (!isValidName(req.body.givenName)) {
@@ -148,14 +150,18 @@ exports.deletePhoto = function(req, res) {
 
 function isValidEmail(email) {
     var emailRe = /[a-zA-Z0-9!#$%&'*+-/=?^_`{|}~.]+@[a-zA-z0-9-.]+/;
-    return emailRe.test(email);
+    return (typeof email === "string") && emailRe.test(email) && email.length > 0;
 }
 
 function isValidPassword(password) {
-    return password.length > 0;
+    return (typeof password === "string") && password.length > 0;
 }
 
 function isValidName(name) {
-    return name.length > 0;
+    return (typeof name === "string") && name.length > 0;
+}
+
+function isValidUserName(userName) {
+    return (typeof userName === "string") && userName.length > 0;
 }
 
