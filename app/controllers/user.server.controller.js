@@ -121,6 +121,7 @@ exports.getPhoto = function(req, res) {
         res.json(result);
     }, function(code, image) {
         res.status(code);
+        res.setHeader("Content-Type", "image/png");
         res.end(image);
     });
 }
