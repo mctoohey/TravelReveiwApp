@@ -16,6 +16,10 @@ exports.insert = function(username, email, givenName, familyName, password, done
     });
 }
 
+function hashPassword(password) {
+    return bcrypt.hashSync(password, 12);
+}
+
 exports.update = function(id, token, updatedInfo, done) {
     db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
         if (err) {

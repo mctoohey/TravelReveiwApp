@@ -155,10 +155,6 @@ function isValidPassword(password) {
     return password.length > 0;
 }
 
-function hashPassword(password) {
-    return bcrypt.hashSync(password, 12);
-}
-
 function isValidName(name) {
     return name.length > 0;
 }
