@@ -81,6 +81,19 @@ exports.getOne = function(userId, token, done) {
 };
 
 
+exports.exists = function(id, done) {
+    db.getPool.query('SELECT * FROM User WHERE user_id = ?', id, function (err, rows) {
+        if (err) {
+            done(false, err);
+        } else if (rows.length != 1) {
+            done(false);
+        } else {
+            done(true);
+        }
+    });
+}
+
+
 exports.authenticateWithUsername = function(username, password, done) {
     authenticate({username: username}, password, done);
 }

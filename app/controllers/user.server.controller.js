@@ -94,23 +94,35 @@ exports.addPhoto = function(req, res) {
     let imageType = req.headers['content-type'];
     let extension = null;
 
-    if (imageType === 'image/png') extension = '.png';
-    else if (imageType === 'image/jpeg') extension = '.jpeg';
+    User.exists(id, function(exists, err) {
+        if (err) {
+            res.status(500);
+            res.json({"ERROR": "Database error"});
+        } else if (exists) {
+            if (imageType === 'image/png') extension = '.png';
+            else if (imageType === 'image/jpeg') extension = '.jpeg';
 
-    if (extension != null) {
-        fs.writeFile(`user_photos/${id}${extension}`, req.body, function (err) {
-            if (err) {
-                res.status(500);
-                res.json({"ERROR": `Could not save file`});
+            if (extension != null) {
+                fs.writeFile(`user_photos/${id}${extension}`, req.body, function (err) {
+                    if (err) {
+                        res.status(500);
+                        res.json({"ERROR": "Could not save file"});
+                    } else {
+                        res.status(200);
+                        res.json({});
+                    }
+                });
             } else {
-                res.status(200);
-                res.json({});
+                res.status(400);
+                res.json({"ERROR": `Content type '${imageType}' is not supported`});
             }
-        });
-    } else {
-        res.status(400);
-        res.json({"ERROR": `Content type '${imageType}' is not supported`});
-    }
+        } else {
+            res.status(404);
+            res.json({"ERROR": "User not found"});
+        }
+    });
+
+    
 
     
 }
