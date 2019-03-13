@@ -114,6 +114,17 @@ exports.addPhoto = function(req, res) {
     }
 }
 
+exports.getPhoto = function(req, res) {
+    let id = req.params.userId;
+    User.getPhoto(id, function(code, result) {
+        res.status(code);
+        res.json(result);
+    }, function(code, image) {
+        res.status(code);
+        res.end(image);
+    });
+}
+
 function isValidPassword(password) {
     return password.length > 0;
 }

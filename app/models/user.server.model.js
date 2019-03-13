@@ -183,3 +183,25 @@ exports.addPhoto = function(id, token, imageName, imageRaw, done) {
         }
     });
 }
+
+exports.getPhoto = function(id, doneError, doneImage) {
+    db.getPool().query('SELECT * FROM User WHERE user_id = ?', id, function(err, rows) {
+        if (err) {
+            doneError(500, err);
+        } else if (rows.length === 0) {
+            doneError(404, {"ERROR": "User not found"});
+        } else if (rows.length > 1) {
+            doneError(500, {"ERROR": "User id should be unique"});
+        } else if (rows[0].profile_photo_filename === null) {
+            doneError(404, {"ERROR": "Image not found"});
+        } else {
+            fs.readFile(`user_photos/${rows[0].profile_photo_filename}`, function(err, contents) {
+                if (err) {
+                    doneError(500, err);
+                } else {
+                    doneImage(200, contents)
+                }
+            });
+        }
+    });
+}
