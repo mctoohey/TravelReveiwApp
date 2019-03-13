@@ -23,21 +23,31 @@ exports.edit = function(req, res) {
         token = req.headers['x-authorization'];
     }
 
-    let updateInfo = {}
+    let updateInfo = {};
+    let allInfoValid = true;
     if (req.body.hasOwnProperty('givenName')) {
         updateInfo["given_name"] = req.body.givenName;
+        allInfoValid = allInfoValid && isValidName(req.body.givenName);
     }
     if (req.body.hasOwnProperty('familyName')) {
         updateInfo["family_name"] = req.body.familyName;
+        allInfoValid = allInfoValid && isValidName(req.body.familyName);
     }
     if (req.body.hasOwnProperty('password')) {
         updateInfo["password"] = req.body.password;
+        allInfoValid = allInfoValid && isValidPassword(req.body.password);
     }
     
-    User.update(id, token, updateInfo, function (code, result){
-        res.status(code);
-        res.json(result);
-    });
+    if (allInfoValid) {
+        User.update(id, token, updateInfo, function (code, result){
+            res.status(code);
+            res.json(result);
+        });
+    } else {
+        res.status(400);
+        res.json({ERROR: "Invalid information in request"});
+    }
+    
 }
 
 exports.read = function(req, res) {
@@ -76,5 +86,13 @@ exports.logout = function(req, res) {
         res.status(code);
         res.json(result);
     });
+}
+
+function isValidPassword(password) {
+    return password.length > 0;
+}
+
+function isValidName(name) {
+    return name.length > 0;
 }
 
