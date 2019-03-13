@@ -92,24 +92,27 @@ exports.logout = function(req, res) {
 exports.addPhoto = function(req, res) {
     let id = req.params.userId;
     let imageType = req.headers['content-type'];
-    let Extension = null;
-    console.log(req.body);
-    if (imageType === 'image/png') {
-        fs.writeFile(`user_photos/${id}.png`, req.body, function (err) {
+    let extension = null;
+
+    if (imageType === 'image/png') extension = '.png';
+    else if (imageType === 'image/jpeg') extension = '.jpeg';
+
+    if (extension != null) {
+        fs.writeFile(`user_photos/${id}${extension}`, req.body, function (err) {
             if (err) {
                 res.status(500);
-                res.json({ERROR: `Could not save file`});
+                res.json({"ERROR": `Could not save file`});
             } else {
                 res.status(200);
                 res.json({});
             }
         });
-    } else if (imageType === 'image/jpeg') {
-
     } else {
         res.status(400);
-        res.json({ERROR: `Content type '${imageType}' is not supported`});
+        res.json({"ERROR": `Content type '${imageType}' is not supported`});
     }
+
+    
 }
 
 function isValidPassword(password) {
