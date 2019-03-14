@@ -94,7 +94,7 @@ exports.edit = function(req, res) {
         allInfoValid = allInfoValid && isValidLatitude(req.body.longitude);
     }
     
-    if (allInfoValid) {
+    if (allInfoValid && Object.keys(updateInfo).length > 0) {
         Venue.update(id, token, updateInfo, function (code, result){
             res.status(code);
             res.json(result);
