@@ -11,9 +11,8 @@ exports.insert = function(venueName, categoryId, city, shortDescription, longDes
         } else {
             let adminId = rows[0].user_id;
             let date = new Date(Date.now()).toISOString();
-            console.log(date);
             let values = [venueName, categoryId, city, shortDescription, longDescription, address, latitude, longitude, adminId, date];
-            db.getPool().query('INSERT INTO Venue (venue_id, category_id, city, short_description, long_description, address, latitude, longitude, admin_id, date_added) VALUES ?', [[values]], function(err, result) {
+            db.getPool().query('INSERT INTO Venue (venue_name, category_id, city, short_description, long_description, address, latitude, longitude, admin_id, date_added) VALUES ?', [[values]], function(err, result) {
                 if (err) {
                     done(400, err);
                 } else {
