@@ -4,5 +4,6 @@ module.exports = function(app) {
         .post(venue.create);
 
     app.route('/api/v1/venues/:venueId')
-        .get(venue.read);
+        .get(venue.read)
+        .patch(venue.edit);
 }

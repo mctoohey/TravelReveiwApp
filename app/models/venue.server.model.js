@@ -34,6 +34,32 @@ exports.insert = function(venueName, categoryId, city, shortDescription, longDes
     });
 }
 
+exports.update = function(id, token, updatedInfo, done) {
+    db.getPool().query('SELECT * FROM User, Venue WHERE admin_id = user_id and (auth_token = ? or venue_id = ?)', [token, id], function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else if (rows.length === 0) {
+            done(404, {"ERROR": "Venue not found"});
+        } else if (rows.length === 2) {
+            done(403, {"ERROR": "You are not allowed to alter this venue"});
+        } else if (rows.length > 2) {
+            done(500, {"ERROR": "Either venue id or auth token was not unique"});
+        } else if (rows[0].venue_id != id) {
+            done(404, {"ERROR": "Venue not found"});
+        } else if (rows[0].auth_token != token) {
+            done(401, {"ERROR": "Supplied token is not valid"});
+        } else {
+            db.getPool().query('UPDATE Venue SET ? WHERE venue_id = ?', [updatedInfo, id], function(err, result) {
+                if (err) {
+                    done(500, err);
+                } else {
+                    done(200, {});
+                }
+            });
+        }
+    });
+}
+
 exports.getOne = function(id, done) {
     let venueJson = {}
     db.getPool().query('SELECT * FROM Venue WHERE venue_id = ?', id, function(err, rows) {

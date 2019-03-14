@@ -55,8 +55,7 @@ exports.edit = function(req, res) {
     } else {
         res.status(400);
         res.json({ERROR: "Invalid information in request"});
-    }
-    
+    } 
 }
 
 exports.read = function(req, res) {

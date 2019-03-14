@@ -47,6 +47,64 @@ exports.create = function(req, res) {
     }
 }
 
+exports.edit = function(req, res) {
+    let id = req.params.venueId;
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+
+    let updateInfo = {};
+    let allInfoValid = true;
+    if (req.body.hasOwnProperty('venueName')) {
+        updateInfo["venue_name"] = req.body.venueName;
+        allInfoValid = allInfoValid && isValidName(req.body.venueName);
+    }
+    if (req.body.hasOwnProperty('categoryId')) {
+        updateInfo["category_id"] = req.body.categoryId;
+        allInfoValid = allInfoValid && isValidCategoryId(req.body.categoryId);
+    }
+    if (req.body.hasOwnProperty('city')) {
+        updateInfo["city"] = req.body.city;
+        allInfoValid = allInfoValid && isValidCity(req.body.city);
+    }
+
+    if (req.body.hasOwnProperty('shortDescription')) {
+        updateInfo["short_description"] = req.body.shortDescription;
+        allInfoValid = allInfoValid && isValidDescription(req.body.shortDescription);
+    }
+
+    if (req.body.hasOwnProperty('longDescription')) {
+        updateInfo["long_description"] = req.body.longDescription;
+        allInfoValid = allInfoValid && isValidDescription(req.body.longDescription);
+    }
+
+    if (req.body.hasOwnProperty('address')) {
+        updateInfo["address"] = req.body.address;
+        allInfoValid = allInfoValid && isValidAddress(req.body.address);
+    }
+
+    if (req.body.hasOwnProperty('latitude')) {
+        updateInfo["latitude"] = req.body.latitude;
+        allInfoValid = allInfoValid && isValidLatitude(req.body.latitude);
+    }
+
+    if (req.body.hasOwnProperty('longitude')) {
+        updateInfo["longitude"] = req.body.longitude;
+        allInfoValid = allInfoValid && isValidLatitude(req.body.longitude);
+    }
+    
+    if (allInfoValid) {
+        Venue.update(id, token, updateInfo, function (code, result){
+            res.status(code);
+            res.json(result);
+        });
+    } else {
+        res.status(400);
+        res.json({ERROR: "Invalid information in request"});
+    } 
+}
+
 function isValidName(name) {
     return (typeof name === "string") && name.length > 0;
 }
