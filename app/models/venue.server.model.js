@@ -54,6 +54,7 @@ exports.getOne = function(id, done) {
             venueJson.longitude = rows[0].longitude;
 
             let adminId = rows[0].admin_id;
+            let categoryId = rows[0].category_id;
             db.getPool().query('SELECT * FROM User WHERE user_id = ?', adminId, function(err, rows) {
                 if (err) {
                     done(500, err);
@@ -69,18 +70,32 @@ exports.getOne = function(id, done) {
                     }
                     venueJson.admin = admin;
 
-                    db.getPool().query('SELECT * FROM VenuePhoto WHERE venue_id = ?', id, function(err, rows) {
+                    db.getPool().query('SELECT * FROM VenueCategory WHERE category_id = ?', categoryId, function(err, rows) {
                         if (err) {
                             done(500, err);
+                        } else if (rows.length > 1) {
+                            done(500, {"ERROR": "Category id should be unique"});
+                        } else if (rows.length === 0) {
+                            done(500, {"ERROR": "Category id could not be found"});
                         } else {
-                            let photos = [];
-                            for (let row of rows) {
-                                photos.push({"photoFilename": row.photo_filenamePrimary, 
-                                             "photoDescription": row.photo_description, 
-                                             "isPrimary": row.is_primary});
-                            }
-                            venueJson.photos = photos;
-                            done(200, venueJson);
+                            venueJson.category = {"categoryId": categoryId,
+                                                  "categoryName": rows[0].category_name,
+                                                  "categoryDescription": rows[0].category_description}
+
+                            db.getPool().query('SELECT * FROM VenuePhoto WHERE venue_id = ?', id, function(err, rows) {
+                                if (err) {
+                                    done(500, err);
+                                } else {
+                                    let photos = [];
+                                    for (let row of rows) {
+                                        photos.push({"photoFilename": row.photo_filenamePrimary, 
+                                                    "photoDescription": row.photo_description, 
+                                                    "isPrimary": row.is_primary});
+                                    }
+                                    venueJson.photos = photos;
+                                    done(200, venueJson);
+                                }
+                            });
                         }
                     });
                 }
