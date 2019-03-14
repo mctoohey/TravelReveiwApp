@@ -105,6 +105,13 @@ exports.edit = function(req, res) {
     } 
 }
 
+exports.getCategories = function(req, res) {
+    Venue.readCategories(function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
+}
+
 function isValidName(name) {
     return (typeof name === "string") && name.length > 0;
 }

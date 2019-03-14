@@ -129,3 +129,19 @@ exports.getOne = function(id, done) {
         }
     });
 }
+
+exports.readCategories = function (done) {
+    db.getPool().query('SELECT * FROM VenueCategory', function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else {
+            let categories = []
+            for (let row of rows) {
+                categories.push({"categoryId": row.category_id,
+                                 "categoryName": row.category_name,
+                                 "categoryDescription": row.category_description});
+            }
+            done(200, categories);
+        }
+    });
+}
