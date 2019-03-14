@@ -1,5 +1,13 @@
 const Venue = require('../models/venue.server.model');
 
+exports.read = function(req, res) {
+    let id = req.params.venueId;
+    Venue.getOne(id, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
+}
+
 exports.create = function(req, res) {
     let token = '';
     if (req.headers.hasOwnProperty('x-authorization')) {

@@ -17,15 +17,70 @@ exports.insert = function(venueName, categoryId, city, shortDescription, longDes
                     done(500, err);
                 } else if (rows.length === 0) {
                     // TODO: Check reference server response.
-                    done(400, {"ERROR": "Venue category id should be unique"});
+                    done(400, {"ERROR": "Venue category id not found"});
                 } else if (rows.length > 1) {
-                    done(500, err);
+                    done(500, {"ERROR": "Venue category id should be unique"});
                 } else {
                     db.getPool().query('INSERT INTO Venue (venue_name, category_id, city, short_description, long_description, address, latitude, longitude, admin_id, date_added) VALUES ?', [[values]], function(err, result) {
                         if (err) {
                             done(400, err);
                         } else {
                             done(201, {"venueId": result.insertId});
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+
+exports.getOne = function(id, done) {
+    let venueJson = {}
+    db.getPool().query('SELECT * FROM Venue WHERE venue_id = ?', id, function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else if (rows.length === 0) {
+            done(404, {"ERROR": "Venue could not be found"});
+        } else if (rows.length > 1) {
+            done(500, {"ERROR": "Venue id should be unique"});
+        } else {
+            venueJson.venueName = rows[0].venue_name;
+            venueJson.city = rows[0].city;
+            venueJson.shortDescription = rows[0].short_description;
+            venueJson.longDescription = rows[0].long_description;
+            venueJson.dateAdded = rows[0].date_added;
+            venueJson.address = rows[0].address;
+            venueJson.latitude = rows[0].latitude;
+            venueJson.longitude = rows[0].longitude;
+
+            let adminId = rows[0].admin_id;
+            db.getPool().query('SELECT * FROM User WHERE user_id = ?', adminId, function(err, rows) {
+                if (err) {
+                    done(500, err);
+                } else if (rows.length > 1) {
+                    done(500, {"ERROR": "User id should be unique"});
+                } else {
+                    // TODO: Check behavior of this on reference server.
+                    let admin = {"userId":adminId}
+                    if (rows.length === 1) {
+                        admin = {"userId":adminId, "username": rows[0].username}
+                    } else {
+                        admin = {"userId":adminId, "username": null}
+                    }
+                    venueJson.admin = admin;
+
+                    db.getPool().query('SELECT * FROM VenuePhoto WHERE venue_id = ?', id, function(err, rows) {
+                        if (err) {
+                            done(500, err);
+                        } else {
+                            let photos = [];
+                            for (let row of rows) {
+                                photos.push({"photoFilename": row.photo_filenamePrimary, 
+                                             "photoDescription": row.photo_description, 
+                                             "isPrimary": row.is_primary});
+                            }
+                            venueJson.photos = photos;
+                            done(200, venueJson);
                         }
                     });
                 }
