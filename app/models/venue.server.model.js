@@ -130,6 +130,21 @@ exports.getOne = function(id, done) {
     });
 }
 
+exports.get = function(queryItems, queryString, startIndex, count, done) {
+    db.getPool().query('SELECT * FROM Venue WHERE ?', queryString, function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else {
+            let result = []
+            for (let row of rows) {
+                if (queryString === null || row.venue_name) {
+                    result.push({});
+                }
+            }
+        }
+    });
+}
+
 exports.readCategories = function (done) {
     db.getPool().query('SELECT * FROM VenueCategory', function(err, rows) {
         if (err) {
