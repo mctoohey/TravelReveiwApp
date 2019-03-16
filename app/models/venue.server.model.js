@@ -204,9 +204,21 @@ function processQueryRows(venueRows, constraints, result, done) {
                 venue.modeCostRating = costRatingMode;
 
                 db.getPool().query('SELECT * FROM VenuePhoto WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
-
+                    //TODO: photos.
                 });
-                result.push(venue);
+
+                let meetsConstraints = true;
+
+                if (constraints.hasOwnProperty('minStarRating') && constraints.minStarRating > venue.meanStarRating) {
+                    meetsConstraints = false;
+                }
+                if (constraints.hasOwnProperty('maxCostRating' && constraints.maxCostRating < venue.costRatingMode) ) {
+                    meetsConstraints = false;
+                }
+                
+                if (meetsConstraints) {
+                    result.push(venue);
+                }
                 processQueryRows(venueRows, constraints, result, done);
             }
         });

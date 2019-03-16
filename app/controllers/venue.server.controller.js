@@ -126,6 +126,16 @@ exports.get = function(req, res) {
         allValidParams = allValidParams && Number.isInteger(constraints.count) && constraints.count >= 0;
     }
 
+    if (req.query.hasOwnProperty('minStarRating')) {
+        constraints.minStarRating = Number(req.query.minStarRating);
+        allValidParams = allValidParams && constraints.minStarRating >= 1 && constraints.minStarRating <= 5;
+    }
+
+    if (req.query.hasOwnProperty('maxCostRating')) {
+        constraints.maxCostRating = Number(req.query.maxCostRating);
+        allValidParams = allValidParams && constraints.maxCostRating >= 0 && constraints.maxCostRating <= 4;
+    }
+
     if (req.query.hasOwnProperty('q')) {
         constraints.queryString = req.query.q;
     }
