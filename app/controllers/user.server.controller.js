@@ -127,9 +127,9 @@ exports.getPhoto = function(req, res) {
     User.getPhoto(id, function(code, result) {
         res.status(code);
         res.json(result);
-    }, function(code, image) {
+    }, function(code, image, type) {
         res.status(code);
-        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Content-Type", `image/${type}`);
         res.end(image);
     });
 }

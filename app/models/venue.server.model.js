@@ -116,21 +116,135 @@ exports.getOne = function(id, done) {
     });
 }
 
+<<<<<<< HEAD
 exports.get = function(queryItems, queryString, startIndex, count,  done) {
     db.getPool().query('SELECT * FROM Venue WHERE ?', queryString, function(err, rows) {
+=======
+exports.query = function(selectQueryItems, constraints, done) {
+    let queryString = 'SELECT * FROM Venue';
+    if (Object.keys(selectQueryItems).length > 0) {
+        queryString += ' WHERE ?' + ' and ?'.repeat(selectQueryItems.length-1);
+    }
+    
+    db.getPool().query(queryString, selectQueryItems, function(err, rows) {
+>>>>>>> 18c244289663fe3d1df1c20226721ae9ba1691ec
         if (err) {
             done(500, err);
         } else {
             let result = []
+<<<<<<< HEAD
             for (let row of rows) {
                 if (queryString === null || row.venue_name) {
                     result.push({});
                 }
             }
+=======
+            processQueryRows(rows, constraints, result, done);
+>>>>>>> 18c244289663fe3d1df1c20226721ae9ba1691ec
         }
     });
 }
 
+<<<<<<< HEAD
+=======
+function processQueryRows(venueRows, constraints, result, done) {
+    //TODO: distance stuff.
+    if (venueRows.length === 0) {
+        let endIndex = result.length;
+        let startIndex = 0;
+        let sortBy = 'meanStarRating';
+        if (constraints.hasOwnProperty('startIndex')) {
+            startIndex = constraints.startIndex;
+        }
+
+        if (constraints.hasOwnProperty('count')) {
+            endIndex = startIndex + constraints.count;
+        }
+
+        //TODO: Test sorting
+        if (constraints.hasOwnProperty('sortBy')) {
+            sortBy = constraints.sortBy;
+        }
+
+        let sortByFunction = function(a, b){return b[sortBy] - a[sortBy]};
+        if (constraints.hasOwnProperty('reverseSort') && constraints.reverseSort) {
+            sortByFunction = function(a, b){return a[sortBy] - b[sortBy]};
+        }
+
+        result.sort(sortByFunction);
+        return done(200, result.slice(startIndex, endIndex));
+    }
+
+    let row = venueRows.pop();
+    if (!constraints.hasOwnProperty('queryString') || row.venue_name.toLowerCase().includes(constraints.queryString.toLowerCase())) {
+        let venueId = row.venue_id;
+        let venue = {
+            "venueId": venueId,
+            "venueName": row.venue_name,
+            "categoryId": row.category_id,
+            "city": row.city,
+            "shortDescription": row.short_description,
+            "latitude": row.latitude,
+            "longitude": row.longitude,
+            "primaryPhoto": null
+        }
+        
+        db.getPool().query('SELECT * FROM Review WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
+            if (err) {
+                done(500, err);
+            } else {
+                let starRatingSum = 0;
+                let costRatingFrequencies = {};
+
+                let costRatingMode = 0;
+                if (rows.length > 0) {
+                    costRatingMode = rows[0].cost_rating;
+                }
+                for (let row of rows) {
+                    starRatingSum += row.star_rating;
+                    if (costRatingFrequencies.hasOwnProperty(row.cost_rating)) {
+                        costRatingFrequencies[row.cost_rating] += 1;
+                    } else {
+                        costRatingFrequencies[row.cost_rating] = 1;
+                    }
+
+                    if (costRatingFrequencies[row.cost_rating] > costRatingFrequencies[costRatingMode]) {
+                        costRatingMode = row.cost_rating;
+                    }
+                }
+
+                let starRatingMean = 0;
+                if (rows.length > 0) {
+                    starRatingMean = starRatingSum / rows.length;
+                }
+                venue.meanStarRating = starRatingMean;
+                venue.modeCostRating = costRatingMode;
+
+                db.getPool().query('SELECT * FROM VenuePhoto WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
+                    //TODO: photos.
+                });
+
+                let meetsConstraints = true;
+
+                if (constraints.hasOwnProperty('minStarRating') && constraints.minStarRating > venue.meanStarRating) {
+                    meetsConstraints = false;
+                }
+                if (constraints.hasOwnProperty('maxCostRating') && constraints.maxCostRating < venue.modeCostRating) {
+                    meetsConstraints = false;
+                }
+                
+                if (meetsConstraints) {
+                    result.push(venue);
+                }
+                processQueryRows(venueRows, constraints, result, done);
+            }
+        });
+    } else {
+        processQueryRows(venueRows, constraints, result, done);
+    }
+}
+
+>>>>>>> 18c244289663fe3d1df1c20226721ae9ba1691ec
 exports.readCategories = function (done) {
     db.getPool().query('SELECT * FROM VenueCategory', function(err, rows) {
         if (err) {

@@ -183,7 +183,7 @@ exports.getPhoto = function(id, doneError, doneImage) {
                 if (err) {
                     doneError(500, err);
                 } else {
-                    doneImage(200, contents)
+                    doneImage(200, contents, rows[0].profile_photo_filename.split('.')[1]);
                 }
             });
         }

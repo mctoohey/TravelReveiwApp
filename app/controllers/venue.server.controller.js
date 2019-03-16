@@ -112,12 +112,76 @@ exports.getCategories = function(req, res) {
     });
 }
 
+<<<<<<< HEAD
 exports.addPhoto = function(req, res) {
     let description = req.body['description\n'];
     let isPrimary = req.body['makePrimary\n'];
     
     console.log(req.body);
     console.log(req.files);
+=======
+exports.get = function(req, res) {
+    let queryItems = []
+    let constraints = {}
+    let allValidParams = true;
+    if (req.query.hasOwnProperty('startIndex')) {
+        constraints.startIndex = parseInt(req.query.startIndex);
+        allValidParams = allValidParams && Number.isInteger(constraints.startIndex) && constraints.startIndex >= 0;
+    }
+    
+    if (req.query.hasOwnProperty('count')) {
+        constraints.count = parseInt(req.query.count);
+        allValidParams = allValidParams && Number.isInteger(constraints.count) && constraints.count >= 0;
+    }
+
+    if (req.query.hasOwnProperty('minStarRating')) {
+        constraints.minStarRating = Number(req.query.minStarRating);
+        allValidParams = allValidParams && constraints.minStarRating >= 1 && constraints.minStarRating <= 5;
+    }
+
+    if (req.query.hasOwnProperty('maxCostRating')) {
+        constraints.maxCostRating = Number(req.query.maxCostRating);
+        allValidParams = allValidParams && constraints.maxCostRating >= 0 && constraints.maxCostRating <= 4;
+    }
+
+    if (req.query.hasOwnProperty('q')) {
+        constraints.queryString = req.query.q;
+    }
+
+    if (req.query.hasOwnProperty('sortBy')) {
+        constraints.sortBy = req.query.sortBy;
+        allValidParams = allValidParams && ['meanStarRating', 'modeCostRating', 'distance'].includes(constraints.sortBy);
+    }
+
+    if (req.query.hasOwnProperty('reverseSort')) {
+        allValidParams = allValidParams && ['true', 'false'].includes(req.query.reverseSort);
+        constraints.reverseSort = req.query.reverseSort === 'true';
+    }
+
+    if (req.query.hasOwnProperty('city')) {
+        queryItems.push({"city": req.query.city});
+    }
+
+    if (req.query.hasOwnProperty('categoryId')) {
+        queryItems.push({"category_id": req.query.categoryId});
+    }
+
+    if (req.query.hasOwnProperty('adminId')) {
+        queryItems.push({"admin_id": req.query.adminId});
+    }
+    
+    if (allValidParams) {
+        Venue.query(queryItems, constraints, function(code, result) {
+            res.status(code);
+            res.json(result);
+        });
+    } else {
+        res.status(400);
+        res.json({"ERROR": "One or more parameters was invalid"});
+    }
+
+    
+>>>>>>> 18c244289663fe3d1df1c20226721ae9ba1691ec
 }
 
 function isValidName(name) {
