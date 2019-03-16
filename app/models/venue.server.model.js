@@ -173,7 +173,8 @@ function processQueryRows(venueRows, constraints, result, done) {
             "city": row.city,
             "shortDescription": row.short_description,
             "latitude": row.latitude,
-            "longitude": row.longitude
+            "longitude": row.longitude,
+            "primaryPhoto": null
         }
         
         db.getPool().query('SELECT * FROM Review WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
@@ -202,6 +203,10 @@ function processQueryRows(venueRows, constraints, result, done) {
                 }
                 venue.meanStarRating = starRatingMean;
                 venue.modeCostRating = costRatingMode;
+
+                db.getPool().query('SELECT * FROM VenuePhoto WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
+
+                });
                 result.push(venue);
                 processQueryRows(venueRows, constraints, result, done);
             }
