@@ -158,9 +158,8 @@ function processQueryRows(venueRows, constraints, result, done) {
             endIndex = startIndex + constraints.count;
         }
 
-        let finalResult = result.slice(startIndex, endIndex);
-        finalResult.sort(function(a, b){return b.meanStarRating - a.meanStarRating});
-        return done(200, finalResult);
+        result.sort(function(a, b){return b.meanStarRating - a.meanStarRating});
+        return done(200, result.slice(startIndex, endIndex));
     }
 
     if (!constraints.hasOwnProperty('queryString') || row.venue_name.includes(constraints.queryString)) {
