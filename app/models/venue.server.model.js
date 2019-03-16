@@ -148,12 +148,22 @@ exports.query = function(selectQueryItems, constraints, done) {
 
 function processQueryRows(venueRows, constraints, result, done) {
     if (venueRows.length === 0) {
-        return done(200, result);
+        let endIndex = result.length;
+        let startIndex = 0;
+        if (constraints.hasOwnProperty('startIndex')) {
+            startIndex = constraints.startIndex;
+        }
+
+        if (constraints.hasOwnProperty('count')) {
+            endIndex = startIndex + constraints.count;
+        }
+        
+        console.log(result.slice(startIndex, endIndex));
+        return done(200, result.slice(startIndex, endIndex));
     }
 
     if (!constraints.hasOwnProperty('queryString') || row.venue_name.includes(constraints.queryString)) {
         let row = venueRows.pop();
-        console.log(row);
         let venueId = row.venue_id;
         let venue = {
             "venueId": venueId,

@@ -114,13 +114,18 @@ exports.getCategories = function(req, res) {
 
 exports.get = function(req, res) {
     let queryItems = {}
-    let startIndex = 0;
+    let constraints = {}
 
     if (req.query.hasOwnProperty('startIndex')) {
-        startIndex = req.query.startIndex;
+        constraints.startIndex = parseInt(req.query.startIndex);
     }
+    
+    if (req.query.hasOwnProperty('count')) {
+        constraints.count = parseInt(req.query.count);
+    }
+    
 
-    Venue.query({}, {}, function(code, result) {
+    Venue.query({}, constraints, function(code, result) {
         res.status(code);
         res.json(result);
     });
