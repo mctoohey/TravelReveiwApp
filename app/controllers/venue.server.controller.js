@@ -1,4 +1,5 @@
 const Venue = require('../models/venue.server.model');
+const fs = require('fs');
 
 exports.read = function(req, res) {
     let id = req.params.venueId;
@@ -112,14 +113,20 @@ exports.getCategories = function(req, res) {
     });
 }
 
-<<<<<<< HEAD
 exports.addPhoto = function(req, res) {
+    let id = req.params.venueId;
     let description = req.body['description\n'];
     let isPrimary = req.body['makePrimary\n'];
+
+    if (!fs.existsSync(`venue_photos/${id}`)) {
+        fs.mkdirSync(`venue_photos/${id}`);
+    }
+
     
     console.log(req.body);
     console.log(req.files);
-=======
+}
+
 exports.get = function(req, res) {
     let queryItems = []
     let constraints = {}
@@ -178,10 +185,7 @@ exports.get = function(req, res) {
     } else {
         res.status(400);
         res.json({"ERROR": "One or more parameters was invalid"});
-    }
-
-    
->>>>>>> 18c244289663fe3d1df1c20226721ae9ba1691ec
+    }   
 }
 
 function isValidName(name) {

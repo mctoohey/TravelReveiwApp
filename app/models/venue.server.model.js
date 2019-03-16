@@ -116,10 +116,6 @@ exports.getOne = function(id, done) {
     });
 }
 
-<<<<<<< HEAD
-exports.get = function(queryItems, queryString, startIndex, count,  done) {
-    db.getPool().query('SELECT * FROM Venue WHERE ?', queryString, function(err, rows) {
-=======
 exports.query = function(selectQueryItems, constraints, done) {
     let queryString = 'SELECT * FROM Venue';
     if (Object.keys(selectQueryItems).length > 0) {
@@ -127,26 +123,15 @@ exports.query = function(selectQueryItems, constraints, done) {
     }
     
     db.getPool().query(queryString, selectQueryItems, function(err, rows) {
->>>>>>> 18c244289663fe3d1df1c20226721ae9ba1691ec
         if (err) {
             done(500, err);
         } else {
             let result = []
-<<<<<<< HEAD
-            for (let row of rows) {
-                if (queryString === null || row.venue_name) {
-                    result.push({});
-                }
-            }
-=======
             processQueryRows(rows, constraints, result, done);
->>>>>>> 18c244289663fe3d1df1c20226721ae9ba1691ec
         }
     });
 }
 
-<<<<<<< HEAD
-=======
 function processQueryRows(venueRows, constraints, result, done) {
     //TODO: distance stuff.
     if (venueRows.length === 0) {
@@ -244,7 +229,6 @@ function processQueryRows(venueRows, constraints, result, done) {
     }
 }
 
->>>>>>> 18c244289663fe3d1df1c20226721ae9ba1691ec
 exports.readCategories = function (done) {
     db.getPool().query('SELECT * FROM VenueCategory', function(err, rows) {
         if (err) {
