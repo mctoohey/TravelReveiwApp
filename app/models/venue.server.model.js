@@ -131,9 +131,9 @@ exports.getOne = function(id, done) {
 }
 
 exports.query = function(selectQueryItems, constraints, done) {
-    let queryString = 'SELECT * FROM Venue WHERE ?'
-    if (Object.keys(selectQueryItems).length === 0) {
-        queryString = 'SELECT * FROM Venue'
+    let queryString = 'SELECT * FROM Venue';
+    if (Object.keys(selectQueryItems).length > 0) {
+        queryString += ' WHERE ?' + ' and ?'.repeat(selectQueryItems.length-1);
     }
     
     db.getPool().query(queryString, selectQueryItems, function(err, rows) {
@@ -162,8 +162,8 @@ function processQueryRows(venueRows, constraints, result, done) {
         return done(200, result.slice(startIndex, endIndex));
     }
 
+    let row = venueRows.pop();
     if (!constraints.hasOwnProperty('queryString') || row.venue_name.includes(constraints.queryString)) {
-        let row = venueRows.pop();
         let venueId = row.venue_id;
         let venue = {
             "venueId": venueId,

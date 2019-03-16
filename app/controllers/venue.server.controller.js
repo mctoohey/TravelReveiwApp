@@ -113,22 +113,46 @@ exports.getCategories = function(req, res) {
 }
 
 exports.get = function(req, res) {
-    let queryItems = {}
+    let queryItems = []
     let constraints = {}
-
+    let allValidParams = true;
     if (req.query.hasOwnProperty('startIndex')) {
         constraints.startIndex = parseInt(req.query.startIndex);
+        allValidParams = allValidParams && Number.isInteger(constraints.startIndex) && constraints.startIndex >= 0;
     }
     
     if (req.query.hasOwnProperty('count')) {
         constraints.count = parseInt(req.query.count);
+        allValidParams = allValidParams && Number.isInteger(constraints.count) && constraints.count >= 0;
+    }
+
+    if (req.query.hasOwnProperty('q')) {
+        constraints.queryString = req.query.q;
+    }
+
+    if (req.query.hasOwnProperty('city')) {
+        queryItems.push({"city": req.query.city});
+    }
+
+    if (req.query.hasOwnProperty('categoryId')) {
+        queryItems.push({"category_id": req.query.categoryId});
+    }
+
+    if (req.query.hasOwnProperty('adminId')) {
+        queryItems.push({"admin_id": req.query.adminId});
     }
     
+    if (allValidParams) {
+        Venue.query(queryItems, constraints, function(code, result) {
+            res.status(code);
+            res.json(result);
+        });
+    } else {
+        res.status(400);
+        res.json({"ERROR": "One or more parameters was invalid"});
+    }
 
-    Venue.query({}, constraints, function(code, result) {
-        res.status(code);
-        res.json(result);
-    });
+    
 }
 
 function isValidName(name) {
