@@ -163,7 +163,7 @@ function processQueryRows(venueRows, constraints, result, done) {
     }
 
     let row = venueRows.pop();
-    if (!constraints.hasOwnProperty('queryString') || row.venue_name.includes(constraints.queryString)) {
+    if (!constraints.hasOwnProperty('queryString') || row.venue_name.toLowerCase().includes(constraints.queryString.toLowerCase())) {
         let venueId = row.venue_id;
         let venue = {
             "venueId": venueId,
@@ -182,16 +182,20 @@ function processQueryRows(venueRows, constraints, result, done) {
             } else {
                 let starRatingSum = 0;
                 let costRatingFrequencies = {};
+
                 let costRatingMode = 0;
+                if (rows.length > 0) {
+                    costRatingMode = rows[0].cost_rating;
+                }
                 for (let row of rows) {
                     starRatingSum += row.star_rating;
                     if (costRatingFrequencies.hasOwnProperty(row.cost_rating)) {
-                        costRatingFrequencies['cost_rating'] += 1;
+                        costRatingFrequencies[row.cost_rating] += 1;
                     } else {
-                        costRatingFrequencies['cost_rating'] = 1;
+                        costRatingFrequencies[row.cost_rating] = 1;
                     }
 
-                    if (costRatingFrequencies['cost_rating'] > costRatingFrequencies[costRatingMode]) {
+                    if (costRatingFrequencies[row.cost_rating] > costRatingFrequencies[costRatingMode]) {
                         costRatingMode = row.cost_rating;
                     }
                 }
@@ -212,7 +216,7 @@ function processQueryRows(venueRows, constraints, result, done) {
                 if (constraints.hasOwnProperty('minStarRating') && constraints.minStarRating > venue.meanStarRating) {
                     meetsConstraints = false;
                 }
-                if (constraints.hasOwnProperty('maxCostRating' && constraints.maxCostRating < venue.costRatingMode) ) {
+                if (constraints.hasOwnProperty('maxCostRating') && constraints.maxCostRating < venue.modeCostRating) {
                     meetsConstraints = false;
                 }
                 
