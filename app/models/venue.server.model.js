@@ -157,9 +157,10 @@ function processQueryRows(venueRows, constraints, result, done) {
         if (constraints.hasOwnProperty('count')) {
             endIndex = startIndex + constraints.count;
         }
-        
-        console.log(result.slice(startIndex, endIndex));
-        return done(200, result.slice(startIndex, endIndex));
+
+        let finalResult = result.slice(startIndex, endIndex);
+        finalResult.sort(function(a, b){return b.meanStarRating - a.meanStarRating});
+        return done(200, finalResult);
     }
 
     if (!constraints.hasOwnProperty('queryString') || row.venue_name.includes(constraints.queryString)) {
@@ -175,7 +176,7 @@ function processQueryRows(venueRows, constraints, result, done) {
             "longitude": row.longitude
         }
         
-        db.getPool().query('SELECT * FROM Review WHERE reviewed_venue_id = 3', venueId, function(err, rows) {
+        db.getPool().query('SELECT * FROM Review WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
             if (err) {
                 done(500, err);
             } else {
