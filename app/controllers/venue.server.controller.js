@@ -115,16 +115,34 @@ exports.getCategories = function(req, res) {
 
 exports.addPhoto = function(req, res) {
     let id = req.params.venueId;
-    let description = req.body['description\n'];
-    let isPrimary = req.body['makePrimary\n'];
-
-    if (!fs.existsSync(`venue_photos/${id}`)) {
-        fs.mkdirSync(`venue_photos/${id}`);
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
     }
+    let photoDescription = req.body['description\n'];
+    let isPrimary = req.body['makePrimary\n'];
+    let photoFileName = req.files.photo.originalFilename;
+    let fileLocation = req.files.photo.path;
 
     
-    console.log(req.body);
-    console.log(req.files);
+
+    Venue.insertPhoto(id, photoFileName, photoDescription, isPrimary, token, function(code, result) {
+        res.status(code);
+        res.json(result);
+    }, function(code, result) {
+        try {
+            //TODO: Delete entry from database if this occurs.
+            if (!fs.existsSync(`venue_photos/${id}`)) {
+                fs.mkdirSync(`venue_photos/${id}`);
+            }
+            fs.copyFileSync(fileLocation, `venue_photos/${id}/${photoFileName}`);
+            res.status(code);
+            res.json(result)
+        } catch(e) {
+            res.status(500);
+            res.json(e);
+        }
+    });
 }
 
 exports.get = function(req, res) {

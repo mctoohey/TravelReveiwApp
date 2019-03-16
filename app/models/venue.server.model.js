@@ -245,14 +245,14 @@ exports.readCategories = function (done) {
     });
 }
 
-exports.insertPhoto = function(venueId, photo_filename, photo_description, is_primary, token, done) {
-    adminOnlyAction(venueId, token, done, function() {
-        values = [venueId, photo_filename, photo_description, is_primary];
+exports.insertPhoto = function(venueId, photoFilename, photoDescription, isPrimary, token, doneError, doneSuccess) {
+    adminOnlyAction(venueId, token, doneError, function() {
+        values = [venueId, photoFilename, photoDescription, isPrimary];
         db.getPool().query('INSERT INTO VenuePhoto (venue_id, photo_filename, photo_description, is_primary) VALUES ?', [[values]], function(err, result) {
             if (err) {
-                done(400, err);
+                doneError(400, err);
             } else {
-                done(201, {});
+                doneSuccess(201, {});
             }
         });
     });

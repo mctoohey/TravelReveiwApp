@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const formData = require("express-form-data");
+const fs = require('fs');
 
 const formDataOptions = {
     uploadDir: 'temp_downloads',
@@ -26,6 +27,17 @@ module.exports = function () {
     app.use(bodyParser.raw({ type: 'image/jpeg' })); 
     app.use(formData.parse(formDataOptions));
     app.use(formData.format());
+
+    //Create required directories.
+    if (!fs.existsSync('venue_photos')) {
+        fs.mkdirSync('venue_photos');
+    }
+    if (!fs.existsSync('user_photos')) {
+        fs.mkdirSync('user_photos');
+    }
+    if (!fs.existsSync('temp_downloads')) {
+        fs.mkdirSync('temp_downloads');
+    }
 
     // ROUTES
     require('../app/routes/backdoor.routes')(app);
