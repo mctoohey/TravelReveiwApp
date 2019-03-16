@@ -9,4 +9,7 @@ module.exports = function(app) {
 
     app.route('/api/v1/categories')
         .get(venue.getCategories);
+
+    app.route('/api/v1/venues/:venueId/photos')
+        .post(venue.addPhoto);
 }

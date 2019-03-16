@@ -35,28 +35,14 @@ exports.insert = function(venueName, categoryId, city, shortDescription, longDes
 }
 
 exports.update = function(id, token, updatedInfo, done) {
-    db.getPool().query('SELECT * FROM User, Venue WHERE admin_id = user_id and (auth_token = ? or venue_id = ?)', [token, id], function(err, rows) {
-        if (err) {
-            done(500, err);
-        } else if (rows.length === 0) {
-            done(404, {"ERROR": "Venue not found"});
-        } else if (rows.length === 2) {
-            done(403, {"ERROR": "You are not allowed to alter this venue"});
-        } else if (rows.length > 2) {
-            done(500, {"ERROR": "Either venue id or auth token was not unique"});
-        } else if (rows[0].venue_id != id) {
-            done(404, {"ERROR": "Venue not found"});
-        } else if (rows[0].auth_token != token) {
-            done(401, {"ERROR": "Supplied token is not valid"});
-        } else {
-            db.getPool().query('UPDATE Venue SET ? WHERE venue_id = ?', [updatedInfo, id], function(err, result) {
-                if (err) {
-                    done(500, err);
-                } else {
-                    done(200, {});
-                }
-            });
-        }
+    adminOnlyAction(id, token, done, function() {
+        db.getPool().query('UPDATE Venue SET ? WHERE venue_id = ?', [updatedInfo, id], function(err, result) {
+            if (err) {
+                done(500, err);
+            } else {
+                done(200, {});
+            }
+        });
     });
 }
 
@@ -130,7 +116,7 @@ exports.getOne = function(id, done) {
     });
 }
 
-exports.get = function(queryItems, queryString, startIndex, count, done) {
+exports.get = function(queryItems, queryString, startIndex, count,  done) {
     db.getPool().query('SELECT * FROM Venue WHERE ?', queryString, function(err, rows) {
         if (err) {
             done(500, err);
@@ -157,6 +143,39 @@ exports.readCategories = function (done) {
                                  "categoryDescription": row.category_description});
             }
             done(200, categories);
+        }
+    });
+}
+
+exports.insertPhoto = function(venueId, photo_filename, photo_description, is_primary, token, done) {
+    adminOnlyAction(venueId, token, done, function() {
+        values = [venueId, photo_filename, photo_description, is_primary];
+        db.getPool().query('INSERT INTO VenuePhoto (venue_id, photo_filename, photo_description, is_primary) VALUES ?', [[values]], function(err, result) {
+            if (err) {
+                done(400, err);
+            } else {
+                done(201, {});
+            }
+        });
+    });
+}
+
+function adminOnlyAction(venueId, token, done, action) {
+    db.getPool().query('SELECT * FROM User, Venue WHERE admin_id = user_id and (auth_token = ? or venue_id = ?)', [token, venueId], function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else if (rows.length === 0) {
+            done(404, {"ERROR": "Venue not found"});
+        } else if (rows.length === 2) {
+            done(403, {"ERROR": "You are not allowed to alter this venue"});
+        } else if (rows.length > 2) {
+            done(500, {"ERROR": "Either venue id or auth token was not unique"});
+        } else if (rows[0].venue_id != venueId) {
+            done(404, {"ERROR": "Venue not found"});
+        } else if (rows[0].auth_token != token) {
+            done(401, {"ERROR": "Supplied token is not valid"});
+        } else {
+            action();
         }
     });
 }

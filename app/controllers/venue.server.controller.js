@@ -112,6 +112,14 @@ exports.getCategories = function(req, res) {
     });
 }
 
+exports.addPhoto = function(req, res) {
+    let description = req.body['description\n'];
+    let isPrimary = req.body['makePrimary\n'];
+    
+    console.log(req.body);
+    console.log(req.files);
+}
+
 function isValidName(name) {
     return (typeof name === "string") && name.length > 0;
 }

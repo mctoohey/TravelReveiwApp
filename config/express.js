@@ -1,5 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const formData = require("express-form-data");
+
+const formDataOptions = {
+    uploadDir: 'temp_downloads',
+    autoClean: true
+  };
 
 const allowCrossOriginRequests = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -18,6 +24,8 @@ module.exports = function () {
     app.use(bodyParser.raw({ type: 'text/plain' }));  // for the /executeSql endpoint
     app.use(bodyParser.raw({ type: 'image/png' })); 
     app.use(bodyParser.raw({ type: 'image/jpeg' })); 
+    app.use(formData.parse(formDataOptions));
+    app.use(formData.format());
 
     // ROUTES
     require('../app/routes/backdoor.routes')(app);
