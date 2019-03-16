@@ -247,14 +247,40 @@ exports.readCategories = function (done) {
 
 exports.insertPhoto = function(venueId, photoFilename, photoDescription, isPrimary, token, doneError, doneSuccess) {
     adminOnlyAction(venueId, token, doneError, function() {
-        values = [venueId, photoFilename, photoDescription, isPrimary];
-        db.getPool().query('INSERT INTO VenuePhoto (venue_id, photo_filename, photo_description, is_primary) VALUES ?', [[values]], function(err, result) {
+        db.getPool().query('SELECT * FROM VenuePhoto WHERE is_primary = 1', function(err, rows) {
             if (err) {
-                doneError(400, err);
+                doneError(500, err);
+            } else if (rows.length > 1) {
+                doneError(500, {"ERROR": "More than one primary photo found"});
             } else {
-                doneSuccess(201, {});
-            }
+                if (rows.length === 0) {
+                    isPrimary = true;
+                }
+                let primaryValue = 0;
+                if (isPrimary) {
+                    primaryValue = 1;
+                    db.getPool().query('UPDATE VenuePhoto SET is_primary = 0 WHERE venue_id = ?', venueId, function(err, result) {
+                        if (err) {
+                            done(500, err);
+                        } else {
+                            insertPhotoValuesIntoDatabase([venueId, photoFilename, photoDescription, primaryValue], doneError, doneSuccess);
+                        }
+                    });
+                } else {
+                    insertPhotoValuesIntoDatabase([venueId, photoFilename, photoDescription, primaryValue], doneError, doneSuccess);
+                }
+            } 
         });
+    });
+}
+
+function insertPhotoValuesIntoDatabase(values, doneError, doneSuccess) {
+    db.getPool().query('INSERT INTO VenuePhoto (venue_id, photo_filename, photo_description, is_primary) VALUES ?', [[values]], function(err, result) {
+        if (err) {
+            doneError(400, err);
+        } else {
+            doneSuccess(201, {});
+        }
     });
 }
 
