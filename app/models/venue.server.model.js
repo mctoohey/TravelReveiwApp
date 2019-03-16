@@ -147,9 +147,11 @@ exports.query = function(selectQueryItems, constraints, done) {
 }
 
 function processQueryRows(venueRows, constraints, result, done) {
+    //TODO: distance stuff.
     if (venueRows.length === 0) {
         let endIndex = result.length;
         let startIndex = 0;
+        let sortBy = 'meanStarRating';
         if (constraints.hasOwnProperty('startIndex')) {
             startIndex = constraints.startIndex;
         }
@@ -158,7 +160,17 @@ function processQueryRows(venueRows, constraints, result, done) {
             endIndex = startIndex + constraints.count;
         }
 
-        result.sort(function(a, b){return b.meanStarRating - a.meanStarRating});
+        //TODO: Test sorting
+        if (constraints.hasOwnProperty('sortBy')) {
+            sortBy = constraints.sortBy;
+        }
+
+        let sortByFunction = function(a, b){return b[sortBy] - a[sortBy]};
+        if (constraints.hasOwnProperty('reverseSort') && constraints.reverseSort) {
+            sortByFunction = function(a, b){return a[sortBy] - b[sortBy]};
+        }
+
+        result.sort(sortByFunction);
         return done(200, result.slice(startIndex, endIndex));
     }
 

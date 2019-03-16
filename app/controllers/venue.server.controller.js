@@ -140,6 +140,16 @@ exports.get = function(req, res) {
         constraints.queryString = req.query.q;
     }
 
+    if (req.query.hasOwnProperty('sortBy')) {
+        constraints.sortBy = req.query.sortBy;
+        allValidParams = allValidParams && ['meanStarRating', 'modeCostRating', 'distance'].includes(constraints.sortBy);
+    }
+
+    if (req.query.hasOwnProperty('reverseSort')) {
+        allValidParams = allValidParams && ['true', 'false'].includes(req.query.reverseSort);
+        constraints.reverseSort = req.query.reverseSort === 'true';
+    }
+
     if (req.query.hasOwnProperty('city')) {
         queryItems.push({"city": req.query.city});
     }
