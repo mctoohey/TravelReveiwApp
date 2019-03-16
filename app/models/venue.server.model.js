@@ -130,6 +130,76 @@ exports.getOne = function(id, done) {
     });
 }
 
+exports.query = function(selectQueryItems, constraints, done) {
+    let queryString = 'SELECT * FROM Venue WHERE ?'
+    if (Object.keys(selectQueryItems).length === 0) {
+        queryString = 'SELECT * FROM Venue'
+    }
+    
+    db.getPool().query(queryString, selectQueryItems, function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else {
+            let result = []
+            processQueryRows(rows, constraints, result, done);
+        }
+    });
+}
+
+function processQueryRows(venueRows, constraints, result, done) {
+    if (venueRows.length === 0) {
+        return done(200, result);
+    }
+
+    if (!constraints.hasOwnProperty('queryString') || row.venue_name.includes(constraints.queryString)) {
+        let row = venueRows.pop();
+        console.log(row);
+        let venueId = row.venue_id;
+        let venue = {
+            "venueId": venueId,
+            "venueName": row.venue_name,
+            "categoryId": row.category_id,
+            "city": row.city,
+            "shortDescription": row.short_description,
+            "latitude": row.latitude,
+            "longitude": row.longitude
+        }
+        
+        db.getPool().query('SELECT * FROM Review WHERE reviewed_venue_id = 3', venueId, function(err, rows) {
+            if (err) {
+                done(500, err);
+            } else {
+                let starRatingSum = 0;
+                let costRatingFrequencies = {};
+                let costRatingMode = 0;
+                for (let row of rows) {
+                    starRatingSum += row.star_rating;
+                    if (costRatingFrequencies.hasOwnProperty(row.cost_rating)) {
+                        costRatingFrequencies['cost_rating'] += 1;
+                    } else {
+                        costRatingFrequencies['cost_rating'] = 1;
+                    }
+
+                    if (costRatingFrequencies['cost_rating'] > costRatingFrequencies[costRatingMode]) {
+                        costRatingMode = row.cost_rating;
+                    }
+                }
+
+                let starRatingMean = 0;
+                if (rows.length > 0) {
+                    starRatingMean = starRatingSum / rows.length;
+                }
+                venue.meanStarRating = starRatingMean;
+                venue.modeCostRating = costRatingMode;
+                result.push(venue);
+                processQueryRows(venueRows, constraints, result, done);
+            }
+        });
+    } else {
+        processQueryRows(venueRows, constraints, result, done);
+    }
+}
+
 exports.readCategories = function (done) {
     db.getPool().query('SELECT * FROM VenueCategory', function(err, rows) {
         if (err) {

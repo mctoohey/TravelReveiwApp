@@ -112,6 +112,20 @@ exports.getCategories = function(req, res) {
     });
 }
 
+exports.get = function(req, res) {
+    let queryItems = {}
+    let startIndex = 0;
+
+    if (req.query.hasOwnProperty('startIndex')) {
+        startIndex = req.query.startIndex;
+    }
+
+    Venue.query({}, {}, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
+}
+
 function isValidName(name) {
     return (typeof name === "string") && name.length > 0;
 }
