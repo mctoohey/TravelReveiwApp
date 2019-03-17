@@ -22,5 +22,6 @@ module.exports = function(app) {
         .post(venue.setPrimaryPhoto);
 
     app.route('/api/v1/venues/:venueId/reviews')
-        .post(venue.addReview);
+        .post(venue.addReview)
+        .get(venue.getReviews);
 }

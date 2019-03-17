@@ -37,9 +37,7 @@ exports.update = function(id, token, updatedInfo, done) {
                 }
             });
         }
-    });
-        
-
+    });  
 }
 
 exports.getOne = function(userId, token, done) {
@@ -218,6 +216,22 @@ exports.deletePhoto = function(id, token, done) {
                         done(500, err);
                     }
                 }
+            });
+        }
+    });
+}
+
+exports.getVenueReviews = function(userId, token, done) {
+    db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else if (rows.length != 1) {
+            done(401, {"ERROR": "Invalid token supplied"});
+        } else {
+            db.getPool().query('SELECT * FROM Review WHERE review_author_id = ?', userId, function(err, rows) {
+                if (err) {
+                    done(500, err);
+                } 
             });
         }
     });

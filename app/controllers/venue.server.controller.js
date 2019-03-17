@@ -279,6 +279,14 @@ exports.addReview = function(req, res) {
     }
 }
 
+exports.getReviews = function(req, res) {
+    let id = req.params.venueId;
+    Venue.getVenueReviews(id, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
+}
+
 function isValidName(name) {
     return (typeof name === "string") && name.length > 0;
 }

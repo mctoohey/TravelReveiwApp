@@ -410,6 +410,55 @@ exports.insertReview = function(venueId, reviewBody, starRating, costRating, tok
     });
 }
 
+exports.getVenueReviews = function(venueId, done) {
+    let result = [];
+    db.getPool().query('SELECT * FROM Venue WHERE venue_id = ?', venueId, function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else if (rows.length === 0) {
+            done(404, {"ERROR": "Venue not found"});
+        } else {
+            db.getPool().query('SELECT * FROM Review WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
+                if (err) {
+                    done(500, err);
+                } else {
+                    processReviewQueryRows(rows, result, done);
+                }
+            });
+        }
+    });
+}
+
+function processReviewQueryRows(reviewRows, result, done) {
+    if (reviewRows.length === 0) {
+        result.sort(function(a, b) {return b.timePosted - a.timePosted});
+        return done(200, result);
+    }
+
+    let row = reviewRows.pop();
+    let userId = row.review_author_id;
+    let review = {"reviewBody": row.review_body,
+                             "starRating": row.star_rating,
+                             "costRating": row.cost_rating,
+                             "timePosted": row.time_posted};
+    db.getPool().query('SELECT * FROM User WHERE user_id = ?', userId, function(err, rows) {
+        let username = null;
+        if (err) {
+            done(500, err);
+        } else if (rows.length > 1) {
+            done(500, {"ERROR": "User id should be unique"})
+        } else {
+            let username = null;
+            if (rows.length === 1) {
+                username = rows[0].username;
+            }
+            review.reviewAuthor = {"userId": userId, "username": username};
+            result.push(review);
+            processReviewQueryRows(reviewRows, result, done);
+        }
+    });
+}
+
 function adminOnlyAction(venueId, token, done, action) {
     db.getPool().query('SELECT * FROM User, Venue WHERE admin_id = user_id and (auth_token = ? or venue_id = ?)', [token, venueId], function(err, rows) {
         if (err) {
