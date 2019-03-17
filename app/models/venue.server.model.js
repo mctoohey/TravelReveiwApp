@@ -323,6 +323,7 @@ exports.deletePhoto = function(venueId, photoFilename, token, done) {
                     }
                     break;
                 }
+                i += 1;
             }
             if (isPrimary) {
                 db.getPool().query('UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? and photo_filename = ?', [venueId, newPrimaryFileName], function(err, result) {
@@ -344,6 +345,8 @@ function deletePhotoFromDatabase(venueId, photoFilename, done) {
     db.getPool().query('DELETE FROM VenuePhoto WHERE venue_id = ? and photo_filename = ?', [venueId, photoFilename], function(err, result) {
         if (err) {
             done(500, err);
+        } else if (result.affectedRows === 0) {
+            done(404, {"ERROR": "Could not find photo"});
         } else {
             try {
                 fs.unlinkSync(`venue_photos/${venueId}/${photoFilename}`);
@@ -352,6 +355,27 @@ function deletePhotoFromDatabase(venueId, photoFilename, done) {
                 done(500, err);
             }
         }
+    });
+}
+
+exports.setPrimaryPhoto = function(venueId, photoFilename, token, done) {
+    adminOnlyAction(venueId, token, done, function() {
+        db.getPool().query('UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? and photo_filename = ?', [venueId, photoFilename], function(err, result) {
+            if (err) {
+                done(500, err);
+            } else if (result.affectedRows === 0) {
+                done(404, {"ERROR": "Could not find photo"});
+            } else {
+                db.getPool().query('UPDATE VenuePhoto SET is_primary = 0 WHERE venue_id = ? and photo_filename != ?', [venueId, photoFilename], function(err, result) {
+                    if (err) {
+                        done(500, err);
+                    } else {
+                       done(200, {}); 
+                    }
+                });
+            }
+        });
+        
     });
 }
 

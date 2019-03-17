@@ -122,10 +122,17 @@ exports.addPhoto = function(req, res) {
     }
     let photoDescription = req.body['description\n'];
     let isPrimary = req.body['makePrimary\n'] === 'true';
-    let photoFileName = req.files.photo.originalFilename;
-    let fileLocation = req.files.photo.path;
 
-    
+    let photoFileName = null;
+    let fileLocation = null;
+    if (req.hasOwnProperty('files') && req.files.hasOwnProperty('photo')) {
+        photoFileName = req.files.photo.originalFilename;
+        fileLocation = req.files.photo.path;
+    } else {
+        res.status(400);
+        res.json({"ERROR": "No photo supplied"})
+        return;
+    }
 
     Venue.insertPhoto(id, photoFileName, photoDescription, isPrimary, token, function(code, result) {
         res.status(code);
@@ -168,6 +175,18 @@ exports.deletePhoto = function(req, res) {
     }
 
     Venue.deletePhoto(id, photoFileName, token, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
+}
+
+exports.setPrimaryPhoto = function(req, res) {
+    let id = req.params.venueId;
+    let photoFileName = req.params.photoFilename;
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+    Venue.setPrimaryPhoto(id, photoFileName, token, function(code, result) {
         res.status(code);
         res.json(result);
     });
