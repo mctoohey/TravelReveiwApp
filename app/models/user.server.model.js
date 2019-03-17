@@ -222,6 +222,7 @@ exports.deletePhoto = function(id, token, done) {
 }
 
 exports.getVenueReviews = function(userId, token, done) {
+    // TODO: Finish this.
     db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
         if (err) {
             done(500, err);

@@ -223,9 +223,18 @@ exports.get = function(req, res) {
         constraints.queryString = req.query.q;
     }
 
+    // TODO: validate lat and long.
+    if (req.query.hasOwnProperty('myLatitude')) {
+        constraints.myLatitude = req.query.myLatitude;
+    }
+
+    if (req.query.hasOwnProperty('myLongitude')) {
+        constraints.myLongitude = req.query.myLongitude;
+    }
+
     if (req.query.hasOwnProperty('sortBy')) {
         constraints.sortBy = req.query.sortBy;
-        allValidParams = allValidParams && ['meanStarRating', 'modeCostRating', 'distance'].includes(constraints.sortBy);
+        //allValidParams = allValidParams && ['meanStarRating', 'modeCostRating', 'distance'].includes(constraints.sortBy);
     }
 
     if (req.query.hasOwnProperty('reverseSort')) {

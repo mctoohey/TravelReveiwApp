@@ -1,5 +1,6 @@
 const db = require('../../config/db');
 const fs = require('fs'); 
+const geolib = require('geolib');
 
 exports.insert = function(venueName, categoryId, city, shortDescription, longDescription, address, latitude, longitude, token, done) {
     db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
@@ -101,9 +102,9 @@ exports.getOne = function(id, done) {
                                 } else {
                                     let photos = [];
                                     for (let row of rows) {
-                                        photos.push({"photoFilename": row.photo_filenamePrimary, 
+                                        photos.push({"photoFilename": row.photo_filename, 
                                                     "photoDescription": row.photo_description, 
-                                                    "isPrimary": row.is_primary});
+                                                    "isPrimary": row.is_primary === 1});
                                     }
                                     venueJson.photos = photos;
                                     done(200, venueJson);
@@ -174,6 +175,12 @@ function processQueryRows(venueRows, constraints, result, done) {
             "longitude": row.longitude,
             "primaryPhoto": null
         }
+
+        if (constraints.hasOwnProperty('myLatitude') && constraints.hasOwnProperty('myLongitude')) {
+            let distance = geolib.getDistance({latitude: constraints.myLatitude, longitude: constraints.myLongitude},
+                                        {latitude: row.latitude, longitude: row.longitude}) / 1000;
+            venue.distance = distance;
+        }
         
         db.getPool().query('SELECT * FROM Review WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
             if (err) {
@@ -206,10 +213,6 @@ function processQueryRows(venueRows, constraints, result, done) {
                 venue.meanStarRating = starRatingMean;
                 venue.modeCostRating = costRatingMode;
 
-                db.getPool().query('SELECT * FROM VenuePhoto WHERE reviewed_venue_id = ?', venueId, function(err, rows) {
-                    //TODO: photos.
-                });
-
                 let meetsConstraints = true;
 
                 if (constraints.hasOwnProperty('minStarRating') && constraints.minStarRating > venue.meanStarRating) {
@@ -218,11 +221,25 @@ function processQueryRows(venueRows, constraints, result, done) {
                 if (constraints.hasOwnProperty('maxCostRating') && constraints.maxCostRating < venue.modeCostRating) {
                     meetsConstraints = false;
                 }
-                
+
                 if (meetsConstraints) {
-                    result.push(venue);
+                    db.getPool().query('SELECT * FROM VenuePhoto WHERE venue_id = ? and is_primary = 1', venueId, function(err, rows) {
+                        if (err) {
+                            done(500, err);
+                        } else {
+                            let primaryPhoto = null;
+                            if (rows.length > 0) {
+                                primaryPhoto = rows[0].photo_filename;
+                            }
+                            venue.primaryPhoto = primaryPhoto;
+
+                            result.push(venue);
+                            processQueryRows(venueRows, constraints, result, done);
+                        }
+                    });
+                } else {
+                    processQueryRows(venueRows, constraints, result, done);
                 }
-                processQueryRows(venueRows, constraints, result, done);
             }
         });
     } else {
