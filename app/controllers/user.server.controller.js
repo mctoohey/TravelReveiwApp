@@ -147,6 +147,18 @@ exports.deletePhoto = function(req, res) {
     });
 }
 
+exports.getReviews = function(req, res) {
+    let id = req.params.userId;
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+    User.getVenueReviews(id, token, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
+}
+
 function isValidEmail(email) {
     var emailRe = /[a-zA-Z0-9!#$%&'*+-/=?^_`{|}~.]+@[a-zA-z0-9-.]+/;
     return (typeof email === "string") && emailRe.test(email) && email.length > 0;

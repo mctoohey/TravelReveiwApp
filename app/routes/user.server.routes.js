@@ -7,6 +7,9 @@ app.route('/api/v1/users/:userId')
         .get(user.read)
         .patch(user.edit);
 
+app.route('/api/v1/users/:userId/reviews')
+        .get(user.getReviews);
+
 app.route('/api/v1/users/login')
         .post(user.login);
 

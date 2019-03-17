@@ -222,17 +222,44 @@ exports.deletePhoto = function(id, token, done) {
 }
 
 exports.getVenueReviews = function(userId, token, done) {
-    // TODO: Finish this.
-    db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
+    db.getPool().query('SELECT * FROM User WHERE auth_token = ? or user_id = ?', [token, userId], function(err, rows) {
+        let result = [];
         if (err) {
             done(500, err);
-        } else if (rows.length != 1) {
+        } else if (rows.length > 2) {
+            done(500, {"ERROR": "User id or auth token was not unique."})
+        } else if (rows.length === 0 || rows.length === 1 && rows[0].user_id != userId) {
+            done(404, {"ERROR": "User not found"})
+        } else if (rows.length === 1 && rows[0].auth_token != token) {
             done(401, {"ERROR": "Invalid token supplied"});
         } else {
-            db.getPool().query('SELECT * FROM Review WHERE review_author_id = ?', userId, function(err, rows) {
+            db.getPool().query('SELECT * FROM (Review JOIN User ON review_author_id = user_id JOIN Venue ON reviewed_venue_id = Venue.venue_id JOIN VenueCategory ON Venue.category_id = VenueCategory.category_id) LEFT JOIN VenuePhoto ON (Venue.venue_id = VenuePhoto.venue_id and is_primary = 1) WHERE review_author_id = ?', userId, function(err, rows) {
                 if (err) {
                     done(500, err);
-                } 
+                } else {
+                    for (let row of rows) {
+                        let review = {};
+                        review.reviewAuthor = {"userId": row.user_id, "username": row.username};
+                        review.reviewBody = row.review_body;
+                        review.starRating = row.star_rating;
+                        review.costRating = row.cost_rating;
+                        review.timePosted = row.time_posted;
+
+                        let venue = {};
+                        venue.venueId = row.venue_id;
+                        venue.venueName = row.venue_name;
+                        venue.categoryName = row.category_name;
+                        venue.city = row.city;
+                        venue.shortDescription = row.short_description;
+                        venue.primaryPhoto = row.photo_filename
+
+                        review.venue = venue;
+
+                        result.push(review);
+                    }
+                    done(200, result);
+                    console.log(rows);
+                }
             });
         }
     });
