@@ -268,10 +268,15 @@ exports.addReview = function(req, res) {
     let starRating = req.body.starRating;
     let costRating = req.body.costRating;
 
-    Venue.insertReview(id, reviewBody, starRating, costRating, token, function(code, result) {
-        res.status(code);
-        res.json(result);
-    });
+    if (isValidReviewBody(reviewBody) && isValidStarRating(starRating) && isValidCostRating(costRating)) {
+        Venue.insertReview(id, reviewBody, starRating, costRating, token, function(code, result) {
+            res.status(code);
+            res.json(result);
+        });
+    } else {
+        res.status(400);
+        res.json({"ERROR": "Invalid information in request body"});
+    }
 }
 
 function isValidName(name) {
@@ -300,5 +305,17 @@ function isValidLatitude(latitude) {
 
 function isValidLongitude(longitude) {
     return (typeof longitude === "number") && -180 <= longitude && longitude <= 180;
+}
+
+function isValidReviewBody(review) {
+    return (typeof review === "string") && review.length > 0;
+}
+
+function isValidStarRating(starRating) {
+    return Number.isInteger(starRating) &&  1 <= starRating && starRating <= 5;
+}
+
+function isValidCostRating(costRating) {
+    return Number.isInteger(costRating) &&  0 <= costRating && costRating <= 4;
 }
 
