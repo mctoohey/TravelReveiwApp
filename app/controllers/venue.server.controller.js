@@ -211,30 +211,38 @@ exports.get = function(req, res) {
 
     if (req.query.hasOwnProperty('minStarRating')) {
         constraints.minStarRating = Number(req.query.minStarRating);
-        allValidParams = allValidParams && constraints.minStarRating >= 1 && constraints.minStarRating <= 5;
+        allValidParams = allValidParams && isValidStarRating(constraints.minStarRating);
     }
 
     if (req.query.hasOwnProperty('maxCostRating')) {
         constraints.maxCostRating = Number(req.query.maxCostRating);
-        allValidParams = allValidParams && constraints.maxCostRating >= 0 && constraints.maxCostRating <= 4;
+        allValidParams = allValidParams && isValidCostRating(constraints.maxCostRating);
     }
 
     if (req.query.hasOwnProperty('q')) {
         constraints.queryString = req.query.q;
     }
 
-    // TODO: validate lat and long.
     if (req.query.hasOwnProperty('myLatitude')) {
-        constraints.myLatitude = req.query.myLatitude;
+        constraints.myLatitude = Number(req.query.myLatitude);
+        allValidParams = allValidParams && isValidLatitude(constraints.myLatitude);
     }
 
     if (req.query.hasOwnProperty('myLongitude')) {
-        constraints.myLongitude = req.query.myLongitude;
+        constraints.myLongitude = Number(req.query.myLongitude);
+        allValidParams = allValidParams && isValidLongitude(constraints.myLongitude);
     }
 
     if (req.query.hasOwnProperty('sortBy')) {
-        constraints.sortBy = req.query.sortBy;
-        //allValidParams = allValidParams && ['meanStarRating', 'modeCostRating', 'distance'].includes(constraints.sortBy);
+        if (req.query.sortBy === 'STAR_RATING') {
+            constraints.sortBy = 'meanStarRating';
+        } else if (req.query.sortBy === 'COST_RATING') {
+            constraints.sortBy = 'modeCostRating';
+        } else if (req.query.sortBy === 'DISTANCE') {
+            constraints.sortBy = 'distance';
+        } else {
+            allValidParams = false;
+        }
     }
 
     if (req.query.hasOwnProperty('reverseSort')) {
