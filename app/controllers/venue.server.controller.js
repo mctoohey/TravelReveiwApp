@@ -114,6 +114,7 @@ exports.getCategories = function(req, res) {
 }
 
 exports.addPhoto = function(req, res) {
+    //TODO: validation
     let id = req.params.venueId;
     let token = '';
     if (req.headers.hasOwnProperty('x-authorization')) {
@@ -142,6 +143,33 @@ exports.addPhoto = function(req, res) {
             res.status(500);
             res.json(e);
         }
+    });
+}
+
+exports.getPhoto = function(req, res) {
+    //TODO: validation
+    let id = req.params.venueId;
+    let photoFileName = req.params.photoFilename;
+    Venue.getPhoto(id, photoFileName, function(code, result) {
+        res.status(code);
+        res.json(result);
+    }, function(code, image, type) {
+        res.status(code);
+        res.setHeader("Content-Type", `image/${type}`);
+        res.end(image);
+    });
+}
+
+exports.deletePhoto = function(req, res) {
+    let id = req.params.venueId;
+    let photoFileName = req.params.photoFilename;
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+
+    Venue.deletePhoto(id, photoFileName, token, function(code, result) {
+        res.status(code);
+        res.json(result);
     });
 }
 

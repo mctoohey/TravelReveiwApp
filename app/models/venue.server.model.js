@@ -1,4 +1,5 @@
 const db = require('../../config/db');
+const fs = require('fs'); 
 
 exports.insert = function(venueName, categoryId, city, shortDescription, longDescription, address, latitude, longitude, token, done) {
     db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
@@ -247,7 +248,7 @@ exports.readCategories = function (done) {
 
 exports.insertPhoto = function(venueId, photoFilename, photoDescription, isPrimary, token, doneError, doneSuccess) {
     adminOnlyAction(venueId, token, doneError, function() {
-        db.getPool().query('SELECT * FROM VenuePhoto WHERE is_primary = 1', function(err, rows) {
+        db.getPool().query('SELECT * FROM VenuePhoto WHERE venue_id = ? and is_primary = 1', venueId, function(err, rows) {
             if (err) {
                 doneError(500, err);
             } else if (rows.length > 1) {
@@ -280,6 +281,76 @@ function insertPhotoValuesIntoDatabase(values, doneError, doneSuccess) {
             doneError(400, err);
         } else {
             doneSuccess(201, {});
+        }
+    });
+}
+
+exports.getPhoto = function(venueId, photoFilename, doneError, doneImage) {
+    db.getPool().query('SELECT * FROM VenuePhoto WHERE venue_id = ? and photo_filename = ?', [venueId, photoFilename], function(err, rows) {
+        if (err) {
+            doneError(500, err);
+        } else if (rows.length === 0) {
+            doneError(404, {"ERROR": "Photo not found"});
+        } else if (rows.length > 1) {
+            doneError(500, {"ERROR": "Venue id and photo file name should be a unique combination"});
+        } else {
+            fs.readFile(`venue_photos/${venueId}/${rows[0].photo_filename}`, function(err, contents) {
+                if (err) {
+                    doneError(500, err);
+                } else {
+                    doneImage(200, contents, rows[0].photo_filename.split('.')[1]);
+                }
+            });
+        }
+    });
+}
+
+exports.deletePhoto = function(venueId, photoFilename, token, done) {
+    adminOnlyAction(venueId, token, done, function() {
+        db.getPool().query('SELECT * FROM VenuePhoto WHERE venue_id = ?', venueId, function(err, rows) {
+            let i = 0;
+            let newPrimaryFileName = null;
+            let isPrimary = false;
+            for (let row of rows) {
+                if (row.photo_filename === photoFilename && row.is_primary === 1) {
+                    isPrimary = true;
+                    if (rows.length === 1) {
+                        break;
+                    } else if (i === 0 && rows.length > 1) {
+                        newPrimaryFileName = rows[1].photo_filename;
+                    } else {
+                        newPrimaryFileName = rows[0].photo_filename;
+                    }
+                    break;
+                }
+            }
+            if (isPrimary) {
+                db.getPool().query('UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? and photo_filename = ?', [venueId, newPrimaryFileName], function(err, result) {
+                    if (err) {
+                        done(500, err);
+                    } else {
+                        deletePhotoFromDatabase(venueId, photoFilename, done);
+                    }
+                });
+            } else {
+                deletePhotoFromDatabase(venueId, photoFilename, done);
+            }
+        });
+        
+    });
+}
+
+function deletePhotoFromDatabase(venueId, photoFilename, done) {
+    db.getPool().query('DELETE FROM VenuePhoto WHERE venue_id = ? and photo_filename = ?', [venueId, photoFilename], function(err, result) {
+        if (err) {
+            done(500, err);
+        } else {
+            try {
+                fs.unlinkSync(`venue_photos/${venueId}/${photoFilename}`);
+                done(200, {});
+            } catch(err) {
+                done(500, err);
+            }
         }
     });
 }
