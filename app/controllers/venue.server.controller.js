@@ -170,6 +170,7 @@ exports.getPhoto = function(req, res) {
 exports.deletePhoto = function(req, res) {
     let id = req.params.venueId;
     let photoFileName = req.params.photoFilename;
+    let token = '';
     if (req.headers.hasOwnProperty('x-authorization')) {
         token = req.headers['x-authorization'];
     }
@@ -181,8 +182,10 @@ exports.deletePhoto = function(req, res) {
 }
 
 exports.setPrimaryPhoto = function(req, res) {
+    //TODO: Validation.
     let id = req.params.venueId;
     let photoFileName = req.params.photoFilename;
+    let token = '';
     if (req.headers.hasOwnProperty('x-authorization')) {
         token = req.headers['x-authorization'];
     }
@@ -251,6 +254,24 @@ exports.get = function(req, res) {
         res.status(400);
         res.json({"ERROR": "One or more parameters was invalid"});
     }   
+}
+
+exports.addReview = function(req, res) {
+    //TODO: Validation.
+    let id = req.params.venueId;
+    let token = '';
+    if (req.headers.hasOwnProperty('x-authorization')) {
+        token = req.headers['x-authorization'];
+    }
+
+    let reviewBody = req.body.reviewBody;
+    let starRating = req.body.starRating;
+    let costRating = req.body.costRating;
+
+    Venue.insertReview(id, reviewBody, starRating, costRating, token, function(code, result) {
+        res.status(code);
+        res.json(result);
+    });
 }
 
 function isValidName(name) {

@@ -13,10 +13,14 @@ module.exports = function(app) {
 
     app.route('/api/v1/venues/:venueId/photos')
         .post(venue.addPhoto);
+
     app.route('/api/v1/venues/:venueId/photos/:photoFilename')
         .get(venue.getPhoto)
         .delete(venue.deletePhoto);
 
     app.route('/api/v1/venues/:venueId/photos/:photoFilename/setPrimary')
         .post(venue.setPrimaryPhoto);
+
+    app.route('/api/v1/venues/:venueId/reviews')
+        .post(venue.addReview);
 }

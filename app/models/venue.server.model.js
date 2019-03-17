@@ -379,6 +379,37 @@ exports.setPrimaryPhoto = function(venueId, photoFilename, token, done) {
     });
 }
 
+exports.insertReview = function(venueId, reviewBody, starRating, costRating, token, done) {
+    db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
+        if (err) {
+            done(500, err);
+        } else if (rows.length > 1) {
+            done(500, {"ERROR": "Authentication token should be unique"});
+        } else if (rows.length === 0) {
+            done(401, {"ERROR": "Supplied token is not valid"})
+        } else {
+            let userId = rows[0].user_id;
+            db.getPool().query('SELECT * FROM Venue JOIN Review ON venue_id = reviewed_venue_id WHERE venue_id = ? and (admin_id = ? or review_author_id = ?)', [venueId, userId, userId], function(err, rows) {
+                if (err) {
+                    done(500, err);
+                } else if (rows.length > 0) {
+                    done(403, {"ERROR": "You can not add a review"});
+                } else {
+                    let dateTime = new Date(Date.now()).toISOString();
+                    let values = [venueId, reviewBody, userId, starRating, costRating, dateTime];
+                    db.getPool().query('INSERT INTO Review (reviewed_venue_id, review_body, review_author_id, star_rating, cost_rating, time_posted) VALUES ?', [[values]], function(err, result) {
+                        if (err) {
+                            done(400, err);
+                        } else {
+                            done(201, {});
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+
 function adminOnlyAction(venueId, token, done, action) {
     db.getPool().query('SELECT * FROM User, Venue WHERE admin_id = user_id and (auth_token = ? or venue_id = ?)', [token, venueId], function(err, rows) {
         if (err) {
