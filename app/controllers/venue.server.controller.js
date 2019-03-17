@@ -161,6 +161,7 @@ exports.getPhoto = function(req, res) {
         res.status(code);
         res.json(result);
     }, function(code, image, type) {
+        if (type === 'jpg') type = 'jpeg';
         res.status(code);
         res.setHeader("Content-Type", `image/${type}`);
         res.end(image);
