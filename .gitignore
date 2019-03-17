@@ -25,3 +25,6 @@ typings/
 *.tgz
 .yarn-integrity
 .env
+temp_downloads/
+user_photos/
+venue_photos/
