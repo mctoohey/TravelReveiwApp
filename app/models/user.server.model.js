@@ -246,7 +246,7 @@ exports.getVenueReviews = function(userId, token, done) {
                         review.timePosted = row.time_posted;
 
                         let venue = {};
-                        venue.venueId = row.venue_id;
+                        venue.venueId = row.reviewed_venue_id;
                         venue.venueName = row.venue_name;
                         venue.categoryName = row.category_name;
                         venue.city = row.city;
@@ -258,7 +258,6 @@ exports.getVenueReviews = function(userId, token, done) {
                         result.push(review);
                     }
                     done(200, result);
-                    console.log(rows);
                 }
             });
         }
