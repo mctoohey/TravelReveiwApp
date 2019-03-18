@@ -173,7 +173,6 @@ function processQueryRows(venueRows, constraints, result, done) {
             "shortDescription": row.short_description,
             "latitude": row.latitude,
             "longitude": row.longitude,
-            "primaryPhoto": null
         }
 
         if (constraints.hasOwnProperty('myLatitude') && constraints.hasOwnProperty('myLongitude')) {
@@ -186,10 +185,12 @@ function processQueryRows(venueRows, constraints, result, done) {
             if (err) {
                 done(500, err);
             } else {
-                let starRatingSum = 0;
-                let costRatingFrequencies = {};
+                let starRatingMean = null;
+                let costRatingMode = null;
 
-                let costRatingMode = 0;
+                let costRatingFrequencies = {};
+                let starRatingSum = 0;
+                
                 if (rows.length > 0) {
                     costRatingMode = rows[0].cost_rating;
                 }
@@ -205,8 +206,6 @@ function processQueryRows(venueRows, constraints, result, done) {
                         costRatingMode = row.cost_rating;
                     }
                 }
-
-                let starRatingMean = 0;
                 if (rows.length > 0) {
                     starRatingMean = starRatingSum / rows.length;
                 }
@@ -406,19 +405,27 @@ exports.insertReview = function(venueId, reviewBody, starRating, costRating, tok
             done(401, {"ERROR": "Supplied token is not valid"})
         } else {
             let userId = rows[0].user_id;
-            db.getPool().query('SELECT * FROM Venue JOIN Review ON venue_id = reviewed_venue_id WHERE venue_id = ? and (admin_id = ? or review_author_id = ?)', [venueId, userId, userId], function(err, rows) {
+            db.getPool().query('SELECT * FROM Venue WHERE venue_id = ?', venueId, function(err, rows) {
                 if (err) {
                     done(500, err);
-                } else if (rows.length > 0) {
-                    done(403, {"ERROR": "You can not add a review"});
+                } else if (rows.length === 0) {
+                    done(404, {"ERROR": "Venue not found"})
                 } else {
-                    let dateTime = new Date(Date.now()).toISOString();
-                    let values = [venueId, reviewBody, userId, starRating, costRating, dateTime];
-                    db.getPool().query('INSERT INTO Review (reviewed_venue_id, review_body, review_author_id, star_rating, cost_rating, time_posted) VALUES ?', [[values]], function(err, result) {
+                    db.getPool().query('SELECT * FROM Venue JOIN Review ON venue_id = reviewed_venue_id WHERE venue_id = ? and (admin_id = ? or review_author_id = ?)', [venueId, userId, userId], function(err, rows) {
                         if (err) {
-                            done(400, err);
+                            done(500, err);
+                        } else if (rows.length > 0) {
+                            done(403, {"ERROR": "You can not add a review"});
                         } else {
-                            done(201, {});
+                            let dateTime = new Date(Date.now()).toISOString();
+                            let values = [venueId, reviewBody, userId, starRating, costRating, dateTime];
+                            db.getPool().query('INSERT INTO Review (reviewed_venue_id, review_body, review_author_id, star_rating, cost_rating, time_posted) VALUES ?', [[values]], function(err, result) {
+                                if (err) {
+                                    done(400, err);
+                                } else {
+                                    done(201, {});
+                                }
+                            });
                         }
                     });
                 }
