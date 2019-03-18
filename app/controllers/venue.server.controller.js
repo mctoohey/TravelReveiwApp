@@ -120,37 +120,46 @@ exports.addPhoto = function(req, res) {
     if (req.headers.hasOwnProperty('x-authorization')) {
         token = req.headers['x-authorization'];
     }
-    let photoDescription = req.body['description'];
-    let isPrimary = req.body['makePrimary'] === 'true';
 
-    let photoFileName = null;
-    let fileLocation = null;
-    if (req.hasOwnProperty('files') && req.files.hasOwnProperty('photo')) {
-        photoFileName = req.files.photo.originalFilename;
-        fileLocation = req.files.photo.path;
+    let isValidValues = true;
+    isValidValues = isValidValues && req.body.hasOwnProperty('description\n') && req.body['description\n'].length > 0;
+    isValidValues = isValidValues && req.body.hasOwnProperty('makePrimary\n') && ['true', 'false'].includes(req.body['makePrimary\n'].toLowerCase());
+
+    if (isValidValues) {
+        let photoDescription = req.body['description\n'];
+        let isPrimary = req.body['makePrimary\n'].toLowerCase() === 'true';
+        let photoFileName = null;
+        let fileLocation = null;
+        if (req.hasOwnProperty('files') && req.files.hasOwnProperty('photo')) {
+            photoFileName = req.files.photo.originalFilename;
+            fileLocation = req.files.photo.path;
+        } else {
+            res.status(400);
+            res.json({"ERROR": "No photo supplied"});
+            return;
+        }
+
+        Venue.insertPhoto(id, photoFileName, photoDescription, isPrimary, token, function(code, result) {
+            res.status(code);
+            res.json(result);
+        }, function(code, result) {
+            try {
+                //TODO: Delete entry from database if this occurs.
+                if (!fs.existsSync(`venue_photos/${id}`)) {
+                    fs.mkdirSync(`venue_photos/${id}`);
+                }
+                fs.copyFileSync(fileLocation, `venue_photos/${id}/${photoFileName}`);
+                res.status(code);
+                res.json(result)
+            } catch(e) {
+                res.status(500);
+                res.json(e);
+            }
+        });
     } else {
         res.status(400);
-        res.json({"ERROR": "No photo supplied"})
-        return;
+        res.json({"ERROR": "Either description or make primary is invalid"});
     }
-
-    Venue.insertPhoto(id, photoFileName, photoDescription, isPrimary, token, function(code, result) {
-        res.status(code);
-        res.json(result);
-    }, function(code, result) {
-        try {
-            //TODO: Delete entry from database if this occurs.
-            if (!fs.existsSync(`venue_photos/${id}`)) {
-                fs.mkdirSync(`venue_photos/${id}`);
-            }
-            fs.copyFileSync(fileLocation, `venue_photos/${id}/${photoFileName}`);
-            res.status(code);
-            res.json(result)
-        } catch(e) {
-            res.status(500);
-            res.json(e);
-        }
-    });
 }
 
 exports.getPhoto = function(req, res) {
