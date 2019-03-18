@@ -231,17 +231,13 @@ exports.get = function(req, res) {
 
     if (req.query.hasOwnProperty('myLongitude')) {
         constraints.myLongitude = Number(req.query.myLongitude);
-        allValidParams = allValidParams && isValidLongitude(constraints.myLongitude);
+        req.query.sortBy
     }
 
     if (req.query.hasOwnProperty('sortBy')) {
-        if (req.query.sortBy === 'STAR_RATING') {
-            constraints.sortBy = 'meanStarRating';
-        } else if (req.query.sortBy === 'COST_RATING') {
-            constraints.sortBy = 'modeCostRating';
-        } else if (req.query.sortBy === 'DISTANCE') {
-            constraints.sortBy = 'distance';
-        } else {
+        constraints.sortBy = req.query.sortBy;
+        allValidParams = allValidParams && ['STAR_RATING', 'COST_RATING', 'DISTANCE'].includes(constraints.sortBy);
+        if (constraints.sortBy === 'DISTANCE' && (!req.query.hasOwnProperty('myLatitude') || !req.query.hasOwnProperty('myLongitude'))) {
             allValidParams = false;
         }
     }
@@ -276,7 +272,6 @@ exports.get = function(req, res) {
 
 exports.addReview = function(req, res) {
     //TODO: Validation.
-    //TODO: 404!
     let id = req.params.venueId;
     let token = '';
     if (req.headers.hasOwnProperty('x-authorization')) {

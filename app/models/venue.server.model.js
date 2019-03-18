@@ -2,6 +2,35 @@ const db = require('../../config/db');
 const fs = require('fs'); 
 const geolib = require('geolib');
 
+const sortFunctions = {"DISTANCE": sortDistance, "STAR_RATING": sortStarRating, "COST_RATING": sortModeCostRating};
+
+function sortDistance(a ,b) {
+    let comp = a.distance - b.distance;
+    if (comp === 0) {
+        return a.venueId - b.venueId;
+    } else {
+        return comp;
+    }
+}
+
+function sortModeCostRating(a ,b) {
+    let comp = a.modeCostRating - b.modeCostRating;
+    if (comp === 0) {
+        return a.venueId - b.venueId;
+    } else {
+        return comp;
+    }
+}
+
+function sortStarRating(a ,b) {
+    let comp = b.meanStarRating - a.meanStarRating;
+    if (comp === 0) {
+        return a.venueId - b.venueId;
+    } else {
+        return comp;
+    }
+}
+
 exports.insert = function(venueName, categoryId, city, shortDescription, longDescription, address, latitude, longitude, token, done) {
     db.getPool().query('SELECT * FROM User WHERE auth_token = ?', token, function(err, rows) {
         if (err) {
@@ -139,7 +168,7 @@ function processQueryRows(venueRows, constraints, result, done) {
     if (venueRows.length === 0) {
         let endIndex = result.length;
         let startIndex = 0;
-        let sortBy = 'meanStarRating';
+        let sortBy = 'STAR_RATING'
         if (constraints.hasOwnProperty('startIndex')) {
             startIndex = constraints.startIndex;
         }
@@ -148,17 +177,18 @@ function processQueryRows(venueRows, constraints, result, done) {
             endIndex = startIndex + constraints.count;
         }
 
-        //TODO: Test sorting
+        
         if (constraints.hasOwnProperty('sortBy')) {
             sortBy = constraints.sortBy;
-        }
+        } 
 
-        let sortByFunction = function(a, b){return b[sortBy] - a[sortBy]};
+        sortFunction = sortFunctions[sortBy];
         if (constraints.hasOwnProperty('reverseSort') && constraints.reverseSort) {
-            sortByFunction = function(a, b){return a[sortBy] - b[sortBy]};
+            sortFunction = function(a, b) {
+                return -sortFunctions[sortBy](a, b);
+            }
         }
-
-        result.sort(sortByFunction);
+        result.sort(sortFunction);
         return done(200, result.slice(startIndex, endIndex));
     }
 
