@@ -120,8 +120,8 @@ exports.addPhoto = function(req, res) {
     if (req.headers.hasOwnProperty('x-authorization')) {
         token = req.headers['x-authorization'];
     }
-    let photoDescription = req.body['description\n'];
-    let isPrimary = req.body['makePrimary\n'] === 'true';
+    let photoDescription = req.body['description'];
+    let isPrimary = req.body['makePrimary'] === 'true';
 
     let photoFileName = null;
     let fileLocation = null;
