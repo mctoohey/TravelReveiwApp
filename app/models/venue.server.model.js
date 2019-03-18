@@ -477,7 +477,7 @@ function processReviewQueryRows(reviewRows, result, done) {
 }
 
 function adminOnlyAction(venueId, token, done, action) {
-    db.getPool().query('SELECT * FROM User, Venue WHERE admin_id = user_id and (auth_token = ? or venue_id = ?)', [token, venueId], function(err, rows) {
+    db.getPool().query('SELECT * FROM User LEFT JOIN Venue ON user_id = admin_id WHERE (auth_token = ? or venue_id = ?)', [token, venueId], function(err, rows) {
         if (err) {
             done(500, err);
         } else if (rows.length === 0) {

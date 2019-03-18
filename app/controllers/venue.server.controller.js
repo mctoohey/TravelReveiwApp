@@ -102,7 +102,7 @@ exports.edit = function(req, res) {
         });
     } else {
         res.status(400);
-        res.json({ERROR: "Invalid information in request"});
+        res.json({"ERROR": "Invalid information in request"});
     } 
 }
 
@@ -276,6 +276,7 @@ exports.get = function(req, res) {
 
 exports.addReview = function(req, res) {
     //TODO: Validation.
+    //TODO: 404!
     let id = req.params.venueId;
     let token = '';
     if (req.headers.hasOwnProperty('x-authorization')) {
