@@ -1,7 +1,6 @@
 const db = require('../../config/db');
 const bcrypt = require('bcrypt');
 const cyrpto = require('crypto');
-const uuidv1 = require('uuid/v1');
 const fs = require('fs'); 
 
 exports.insert = function(username, email, givenName, familyName, password, done) {
