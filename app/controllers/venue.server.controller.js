@@ -121,13 +121,27 @@ exports.addPhoto = function(req, res) {
         token = req.headers['x-authorization'];
     }
 
+    let descriptionKey = null;
+    if (req.body.hasOwnProperty('description\n')) {
+        descriptionKey = 'description\n';
+    } else {
+        descriptionKey = 'description';
+    }
+
+    let makePrimaryKey = null;
+    if (req.body.hasOwnProperty('makePrimary\n')) {
+        makePrimaryKey = 'makePrimary\n';
+    } else {
+        makePrimaryKey = 'makePrimary';
+    }
+
     let isValidValues = true;
-    isValidValues = isValidValues && req.body.hasOwnProperty('description\n') && req.body['description\n'].length > 0;
-    isValidValues = isValidValues && req.body.hasOwnProperty('makePrimary\n') && ['true', 'false'].includes(req.body['makePrimary\n'].toLowerCase());
+    isValidValues = isValidValues && req.body.hasOwnProperty(descriptionKey) && req.body[descriptionKey].length > 0;
+    isValidValues = isValidValues && req.body.hasOwnProperty(makePrimaryKey) && ['true', 'false'].includes(req.body[makePrimaryKey].toLowerCase());
 
     if (isValidValues) {
-        let photoDescription = req.body['description\n'];
-        let isPrimary = req.body['makePrimary\n'].toLowerCase() === 'true';
+        let photoDescription = req.body[descriptionKey];
+        let isPrimary = req.body[makePrimaryKey].toLowerCase() === 'true';
         let photoFileName = null;
         let fileLocation = null;
         if (req.hasOwnProperty('files') && req.files.hasOwnProperty('photo')) {
