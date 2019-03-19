@@ -1,5 +1,6 @@
 const db = require('../../config/db');
 const bcrypt = require('bcrypt');
+const cyrpto = require('crypto');
 const uuidv1 = require('uuid/v1');
 const fs = require('fs'); 
 
@@ -97,7 +98,7 @@ function authenticate(uniqueSelectCondition, password, done) {
             passwordHash = rows[0].password;
 
             if (bcrypt.compareSync(password, passwordHash)) {
-                let token = uuidv1();
+                let token = cyrpto.randomBytes(32).toString('hex');
                 authResult = {
                     "userId": rows[0].user_id,
                     "token": token
