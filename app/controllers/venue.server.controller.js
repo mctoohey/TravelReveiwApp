@@ -264,14 +264,17 @@ exports.get = function(req, res) {
 
     if (req.query.hasOwnProperty('city')) {
         queryItems.push({"city": req.query.city});
+        allValidParams = allValidParams && isValidCity(req.query.city);
     }
 
     if (req.query.hasOwnProperty('categoryId')) {
         queryItems.push({"category_id": req.query.categoryId});
+        allValidParams = allValidParams && isValidCategoryId(Number(req.query.categoryId));
     }
 
     if (req.query.hasOwnProperty('adminId')) {
         queryItems.push({"admin_id": req.query.adminId});
+        allValidParams = allValidParams && isValidAdminId(Number(req.query.adminId));
     }
     
     if (allValidParams) {
@@ -354,5 +357,9 @@ function isValidStarRating(starRating) {
 
 function isValidCostRating(costRating) {
     return Number.isInteger(costRating) &&  0 <= costRating && costRating <= 4;
+}
+
+function isValidAdminId(adminId) {
+    return Number.isInteger(adminId) &&  0 <= adminId; 
 }
 
