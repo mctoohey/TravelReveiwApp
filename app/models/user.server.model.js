@@ -97,7 +97,7 @@ function authenticate(uniqueSelectCondition, password, done) {
             passwordHash = rows[0].password;
 
             if (bcrypt.compareSync(password, passwordHash)) {
-                let token = cyrpto.randomBytes(32).toString('hex');
+                let token = cyrpto.randomBytes(16).toString('hex');
                 authResult = {
                     "userId": rows[0].user_id,
                     "token": token

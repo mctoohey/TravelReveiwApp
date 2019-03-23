@@ -160,7 +160,7 @@ exports.getReviews = function(req, res) {
 }
 
 function isValidEmail(email) {
-    var emailRe = /[a-zA-Z0-9!#$%&'*+-/=?^_`{|}~.]+@[a-zA-z0-9-.]+/;
+    let emailRe = /^[a-zA-Z0-9!#$%&'*+-/=?^_`{|}~.]+@[a-zA-z0-9-.]+$/;
     return (typeof email === "string") && emailRe.test(email) && email.length > 0;
 }
 
@@ -172,7 +172,8 @@ function isValidName(name) {
     return (typeof name === "string") && name.length > 0;
 }
 
-function isValidUserName(userName) {
-    return (typeof userName === "string") && userName.length > 0;
+function isValidUserName(username) {
+    let usernameRe = /^[a-zA-Z0-9]+$/;
+    return (typeof username === "string") && usernameRe.test(username) && username.length > 0;
 }
 

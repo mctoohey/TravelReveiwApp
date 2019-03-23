@@ -120,28 +120,14 @@ exports.addPhoto = function(req, res) {
     if (req.headers.hasOwnProperty('x-authorization')) {
         token = req.headers['x-authorization'];
     }
-
-    let descriptionKey = null;
-    if (req.body.hasOwnProperty('description\n')) {
-        descriptionKey = 'description\n';
-    } else {
-        descriptionKey = 'description';
-    }
-
-    let makePrimaryKey = null;
-    if (req.body.hasOwnProperty('makePrimary\n')) {
-        makePrimaryKey = 'makePrimary\n';
-    } else {
-        makePrimaryKey = 'makePrimary';
-    }
+    let validFileExtensions = ['png', 'jpeg', 'jpg'];
 
     let isValidValues = true;
-    isValidValues = isValidValues && req.body.hasOwnProperty(descriptionKey) && req.body[descriptionKey].length > 0;
-    isValidValues = isValidValues && req.body.hasOwnProperty(makePrimaryKey) && ['true', 'false'].includes(req.body[makePrimaryKey].toLowerCase());
-
+    isValidValues = isValidValues && req.body.hasOwnProperty('description') && req.body['description'].length > 0;
+    isValidValues = isValidValues && req.body.hasOwnProperty('makePrimary') && ['true', 'false'].includes(req.body['makePrimary'].toLowerCase());
     if (isValidValues) {
-        let photoDescription = req.body[descriptionKey];
-        let isPrimary = req.body[makePrimaryKey].toLowerCase() === 'true';
+        let photoDescription = req.body['description'];
+        let isPrimary = req.body['makePrimary'].toLowerCase() === 'true';
         let photoFileName = null;
         let fileLocation = null;
         if (req.hasOwnProperty('files') && req.files.hasOwnProperty('photo')) {
@@ -150,6 +136,12 @@ exports.addPhoto = function(req, res) {
         } else {
             res.status(400);
             res.json({"ERROR": "No photo supplied"});
+            return;
+        }
+
+        if (!validFileExtensions.includes(photoFileName.split('.')[1])) {
+            res.status(400);
+            res.json({"ERROR": "Not a valid file extension, must be '.png', '.jpg' or '.jpeg'"});
             return;
         }
 
@@ -266,7 +258,7 @@ exports.get = function(req, res) {
     }
 
     if (req.query.hasOwnProperty('reverseSort')) {
-        allValidParams = allValidParams && ['true', 'false'].includes(req.query.reverseSort);
+        allValidParams = allValidParams && ['true', 'false'].includes(req.query.reverseSort.toLowerCase());
         constraints.reverseSort = req.query.reverseSort === 'true';
     }
 
