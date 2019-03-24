@@ -1,7 +1,6 @@
 const User = require('../models/user.server.model');
 
 exports.create = function(req, res) {
-    // TODO: Check that all fields are valid.
     if (!isValidEmail(req.body.email)) {
         res.status(400).json({"Validation Error": "Invalid email address"});
     } else if (!isValidUserName(req.body.username)) {

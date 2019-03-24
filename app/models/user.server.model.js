@@ -42,7 +42,6 @@ exports.update = function(id, token, updatedInfo, done) {
 
 exports.getOne = function(userId, token, done) {
     db.getPool().query('SELECT * FROM User WHERE user_id = ?', userId, function (err, rows) {
-        // TODO: Consider using different status code here.
         if (err) {
             done(404, err);
         } else if (rows.length == 0) {

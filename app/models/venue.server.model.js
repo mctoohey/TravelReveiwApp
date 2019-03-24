@@ -47,7 +47,6 @@ exports.insert = function(venueName, categoryId, city, shortDescription, longDes
                 if (err) {
                     done(500, err);
                 } else if (rows.length === 0) {
-                    // TODO: Check reference server response.
                     done(400, {"ERROR": "Venue category id not found"});
                 } else if (rows.length > 1) {
                     done(500, {"ERROR": "Venue category id should be unique"});
@@ -104,7 +103,6 @@ exports.getOne = function(id, done) {
                 } else if (rows.length > 1) {
                     done(500, {"ERROR": "User id should be unique"});
                 } else {
-                    // TODO: Check behavior of this on reference server.
                     let admin = {"userId":adminId}
                     if (rows.length === 1) {
                         admin = {"userId":adminId, "username": rows[0].username}
@@ -164,7 +162,6 @@ exports.query = function(selectQueryItems, constraints, done) {
 }
 
 function processQueryRows(venueRows, constraints, result, done) {
-    //TODO: distance stuff.
     if (venueRows.length === 0) {
         let endIndex = result.length;
         let startIndex = 0;

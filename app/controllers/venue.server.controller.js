@@ -15,7 +15,7 @@ exports.create = function(req, res) {
     if (req.headers.hasOwnProperty('x-authorization')) {
         token = req.headers['x-authorization'];
     }
-    // TODO: Check that all fields are valid.
+    
     if (!isValidName(req.body.venueName)) {
         res.status(400).json({"Validation Error": "Invalid venue name"});
     } else if (!isValidCategoryId(req.body.categoryId)) {
@@ -115,7 +115,6 @@ exports.getCategories = function(req, res) {
 }
 
 exports.addPhoto = function(req, res) {
-    //TODO: validation
     let id = req.params.venueId;
     let token = '';
     if (req.headers.hasOwnProperty('x-authorization')) {
@@ -175,7 +174,6 @@ exports.addPhoto = function(req, res) {
 }
 
 exports.getPhoto = function(req, res) {
-    //TODO: validation
     let id = req.params.venueId;
     let photoFileName = req.params.photoFilename;
     Venue.getPhoto(id, photoFileName, function(code, result) {
@@ -204,7 +202,6 @@ exports.deletePhoto = function(req, res) {
 }
 
 exports.setPrimaryPhoto = function(req, res) {
-    //TODO: Validation.
     let id = req.params.venueId;
     let photoFileName = req.params.photoFilename;
     let token = '';
@@ -295,7 +292,6 @@ exports.get = function(req, res) {
 }
 
 exports.addReview = function(req, res) {
-    //TODO: Validation.
     let id = req.params.venueId;
     let token = '';
     if (req.headers.hasOwnProperty('x-authorization')) {
