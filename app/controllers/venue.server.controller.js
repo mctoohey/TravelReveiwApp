@@ -240,6 +240,7 @@ exports.get = function(req, res) {
 
     if (req.query.hasOwnProperty('q')) {
         constraints.queryString = req.query.q;
+        allValidParams =  allValidParams && constraints.queryString.length > 0;
     }
 
     if (req.query.hasOwnProperty('myLatitude')) {
@@ -249,7 +250,7 @@ exports.get = function(req, res) {
 
     if (req.query.hasOwnProperty('myLongitude')) {
         constraints.myLongitude = Number(req.query.myLongitude);
-        req.query.sortBy
+        allValidParams = allValidParams && isValidLongitude(constraints.myLongitude);
     }
 
     if (req.query.hasOwnProperty('sortBy')) {
