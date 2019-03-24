@@ -1,4 +1,5 @@
 const Venue = require('../models/venue.server.model');
+const uuidv1 = require('uuid/v1');
 const fs = require('fs');
 
 exports.read = function(req, res) {
@@ -145,7 +146,12 @@ exports.addPhoto = function(req, res) {
             return;
         }
 
-        Venue.insertPhoto(id, photoFileName, photoDescription, isPrimary, token, function(code, result) {
+        let photoExtension = photoFileName.split('.')[1];
+        if (photoExtension === 'jpg') photoExtension = 'jpeg';
+
+        let storedPhotoName = uuidv1() + '.' + photoExtension;
+
+        Venue.insertPhoto(id, storedPhotoName, photoDescription, isPrimary, token, function(code, result) {
             res.status(code);
             res.json(result);
         }, function(code, result) {
