@@ -140,13 +140,13 @@ exports.addPhoto = function(req, res) {
             return;
         }
 
-        if (!validFileExtensions.includes(photoFileName.split('.')[1])) {
+        let photoExtension = photoFileName.split('.')[photoFileName.split('.').length-1];
+        if (!validFileExtensions.includes(photoExtension)) {
             res.status(400);
             res.json({"ERROR": "Not a valid file extension, must be '.png', '.jpg' or '.jpeg'"});
             return;
         }
 
-        let photoExtension = photoFileName.split('.')[1];
         if (photoExtension === 'jpg') photoExtension = 'jpeg';
 
         let storedPhotoName = uuidv1() + '.' + photoExtension;
