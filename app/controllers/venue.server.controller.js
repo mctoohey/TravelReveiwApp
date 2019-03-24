@@ -160,7 +160,7 @@ exports.addPhoto = function(req, res) {
                 if (!fs.existsSync(`venue_photos/${id}`)) {
                     fs.mkdirSync(`venue_photos/${id}`);
                 }
-                fs.copyFileSync(fileLocation, `venue_photos/${id}/${photoFileName}`);
+                fs.copyFileSync(fileLocation, `venue_photos/${id}/${storedPhotoName}`);
                 res.status(code);
                 res.json(result)
             } catch(e) {
