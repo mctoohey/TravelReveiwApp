@@ -263,7 +263,7 @@ exports.get = function(req, res) {
 
     if (req.query.hasOwnProperty('reverseSort')) {
         allValidParams = allValidParams && ['true', 'false'].includes(req.query.reverseSort.toLowerCase());
-        constraints.reverseSort = req.query.reverseSort === 'true';
+        constraints.reverseSort = req.query.reverseSort.toLowerCase() === 'true';
     }
 
     if (req.query.hasOwnProperty('city')) {
