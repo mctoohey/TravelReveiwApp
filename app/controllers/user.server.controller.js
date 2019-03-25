@@ -1,4 +1,5 @@
 const User = require('../models/user.server.model');
+const bcrypt = require('bcrypt');
 
 exports.create = function(req, res) {
     if (!isValidEmail(req.body.email)) {
@@ -42,8 +43,14 @@ exports.edit = function(req, res) {
         allInfoValid = allInfoValid && isValidName(req.body.familyName);
     }
     if (req.body.hasOwnProperty('password')) {
-        updateInfo["password"] = req.body.password;
+        updateInfo["password"] = bcrypt.hashSync(req.body.password, 12);
         allInfoValid = allInfoValid && isValidPassword(req.body.password);
+    }
+
+    if (Object.keys(updateInfo).length === 0) {
+        res.status(400);
+        res.json({"ERROR": "No valid fields provided"});
+        return;
     }
     
     if (allInfoValid) {
@@ -53,7 +60,7 @@ exports.edit = function(req, res) {
         });
     } else {
         res.status(400);
-        res.json({ERROR: "Invalid information in request"});
+        res.json({"ERROR": "Invalid information in request"});
     } 
 }
 
