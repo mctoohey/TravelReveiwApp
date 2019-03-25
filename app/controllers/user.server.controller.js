@@ -43,8 +43,10 @@ exports.edit = function(req, res) {
         allInfoValid = allInfoValid && isValidName(req.body.familyName);
     }
     if (req.body.hasOwnProperty('password')) {
-        updateInfo["password"] = bcrypt.hashSync(req.body.password, 12);
         allInfoValid = allInfoValid && isValidPassword(req.body.password);
+        if (allInfoValid) {
+            updateInfo["password"] = bcrypt.hashSync(req.body.password, 12);
+        }
     }
 
     if (Object.keys(updateInfo).length === 0) {
