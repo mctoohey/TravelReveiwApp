@@ -2,11 +2,11 @@
     <div class="navigation">
         <div class="menuHeader" v-on:click="menuExpanded=!menuExpanded">MENU</div>
         <transition name="slide">
-            <ul class="menuItem" v-bind:class="{menuHidden: !menuExpanded, menuVisible: menuExpanded}">
-                <li><a>HOME</a></li>
-                <li><a>VENUES</a></li>
-                <li><a>USERS</a></li>
-                <li><a>ABOUT</a></li>
+            <ul v-bind:class="{menuHidden: !menuExpanded, menuVisible: menuExpanded}">
+                <li><router-link to="/" class="menuItem">HOME</router-link></li>
+                <li><router-link to="/" class="menuItem">VENUES</router-link></li>
+                <li><router-link to="/" class="menuItem">USERS</router-link></li>
+                <li><router-link to="/signup" class="menuItem">Sign Up</router-link></li>
             </ul>
         </transition>
     </div>
