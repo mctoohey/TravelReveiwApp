@@ -11,7 +11,7 @@
                 </b-navbar-nav>
 
                 <b-navbar-nav class="ml-auto">
-                    <div>
+                    <div v-if="shouldDisplaySignIn()">
                         <b-button to="/signin">Sign In</b-button>
                     </div>
                 </b-navbar-nav>
@@ -19,3 +19,18 @@
         </b-navbar>
     </div>
 </template>
+
+<script>
+export default {
+    data: function() {
+        return {
+        };
+    },
+    methods: {
+        shouldDisplaySignIn: function() {
+            // TODO: Use a constant.
+            return this.$route.path != "/signin";
+        }
+    }
+}
+</script>
