@@ -11,14 +11,14 @@
                 <b-form-group label="Username" v-bind:state="isValidUsername" invalid-feedback="Username should be between 1 and 64 alphanumeric characters.">
                     <b-form-input v-model="username" placeholder="Username" v-bind:state="isValidUsername"></b-form-input>
                 </b-form-group>
-                <b-form-group label="Email" v-bind:state="isValidEmail">
+                <b-form-group label="Email" v-bind:state="isValidEmail" invalid-feedback="Invalid email address.">
                     <b-form-input v-model="email" placeholder="Email" v-bind:state="isValidEmail"></b-form-input>
                 </b-form-group>
-                <b-form-group v-model="password" label="Password" v-bind:state="isValidPassword">
-                    <b-form-input placeholder="Password" type="password" v-bind:state="isValidPassword"></b-form-input>
+                <b-form-group label="Password" v-bind:state="isValidPassword" invalid-feedback="You must provide a password.">
+                    <b-form-input v-model="password" placeholder="Password" type="password" v-bind:state="isValidPassword"></b-form-input>
                 </b-form-group>
-                <b-form-group v-model="passwordReentry" label="Confirm password" v-bind:state="isValidPasswordReentry">
-                    <b-form-input placeholder="Re-enter password" type="password" v-bind:state="isValidPasswordReentry"></b-form-input>
+                <b-form-group label="Confirm password" v-bind:state="isValidPasswordReentry" invalid-feedback="Passwords do not match.">
+                    <b-form-input  v-model="passwordReentry" placeholder="Re-enter password" type="password" v-bind:state="isValidPasswordReentry"></b-form-input>
                 </b-form-group>
 
                 <b-alert v-model="errorFlag" dismissible variant="danger">{{ errorMessage }}</b-alert>
@@ -56,9 +56,23 @@ export default {
         signUp: function() {
             this.isValidFirstName = this.firstName != "";
             this.isValidLastName = this.lastName != "";
-            this.isValidUsername = this.username != "" && this.username.length <= 64;
-            
+            this.isValidUsername = this.username != "" && this.username.length <= 64 && /^[0-9a-zA-Z]+$/.test(this.username);
 
+            let emailRe = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+            this.isValidEmail = emailRe.test(this.email);
+
+            this.isValidPassword = this.password != "";
+            this.isValidPasswordReentry = this.password === this.passwordReentry;
+
+            if (!this.isValidPassword) {
+                this.isValidPasswordReentry = null;
+            }
+
+            if (!this.isValidPasswordReentry) {
+                this.isValidPassword = null;
+            }
+
+            
         }
     }
 }
