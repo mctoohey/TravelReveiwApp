@@ -20,8 +20,7 @@
                 <b-form-group label="Confirm password" v-bind:state="isValidPasswordReentry" invalid-feedback="Passwords do not match.">
                     <b-form-input  v-model="passwordReentry" placeholder="Re-enter password" type="password" v-bind:state="isValidPasswordReentry"></b-form-input>
                 </b-form-group>
-
-                <b-alert v-model="errorFlag" dismissible variant="danger">{{ errorMessage }}</b-alert>
+                
                 <b-button @click="signUp()">Sign Up</b-button>
             </b-card>
         </b-container>
@@ -68,7 +67,7 @@ export default {
                 this.isValidPasswordReentry = null;
             }
 
-            if (!this.isValidPasswordReentry) {
+            if (!this.isValidPasswordReentry && this.isValidPassword) {
                 this.isValidPassword = null;
             }
 

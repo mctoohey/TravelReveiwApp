@@ -22,6 +22,8 @@ export default {
 
 <style>
 
+body { padding-top: 60px; }
+
 .center {
   margin: 0;
   position: absolute;

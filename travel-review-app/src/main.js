@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
+import Venues from './view/Venues.vue'
 import Home from './view/Home.vue'
 import SignUp from './view/SignUp'
 import SignIn from './view/SignIn'
@@ -20,6 +21,10 @@ const routes = [
   {
     path: "/",
     component: Home
+  },
+  {
+    path: "/venues",
+    component: Venues
   },
   {
     path: "/signin",
