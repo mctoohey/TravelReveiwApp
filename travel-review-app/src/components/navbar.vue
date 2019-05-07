@@ -29,7 +29,7 @@ export default {
     methods: {
         shouldDisplaySignIn: function() {
             // TODO: Use a constant.
-            return this.$route.path != "/signin";
+            return this.$route.path != "/signin" && this.$route.path != '/signup';
         }
     }
 }
