@@ -11,7 +11,13 @@
                 </b-navbar-nav>
 
                 <b-navbar-nav class="ml-auto">
-                    <div v-if="shouldDisplaySignIn()">
+                    <div v-if="shouldDisplayProfileBadge()">
+                        <b-dropdown text="User">
+                            <b-dropdown-item>View Profile</b-dropdown-item>
+                            <b-dropdown-item @click="signOut()">Sign Out</b-dropdown-item>
+                        </b-dropdown>
+                    </div>
+                    <div v-else-if="shouldDisplaySignIn()">
                         <b-button to="/signin">Sign In</b-button>
                     </div>
                 </b-navbar-nav>
@@ -29,7 +35,24 @@ export default {
     methods: {
         shouldDisplaySignIn: function() {
             // TODO: Use a constant.
-            return this.$route.path != "/signin" && this.$route.path != '/signup';
+            return this.$route.path != "/signin" && this.$route.path != '/signup' && !this.$cookies.isKey('auth_token');
+        },
+        shouldDisplayProfileBadge: function () {
+            return this.$cookies.isKey('auth_token');
+        },
+        signOut: function() {
+            this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/logout', {}, {
+                        "x-Authorization": this.$cookies.get('auth_token')
+                    }).then(function() {
+                        this.$cookies.remove('auth_token');
+                        this.$router.push('/');
+                        this.$forceUpdate();
+                    }, function() {
+                        // TODO: Handle error.
+                        this.$cookies.remove('auth_token');
+                        this.$router.push('/');
+                        this.$forceUpdate();
+                    });
         }
     }
 }

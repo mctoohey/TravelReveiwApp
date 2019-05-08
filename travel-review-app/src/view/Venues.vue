@@ -22,7 +22,6 @@ export default {
             venues: []
         };
     },
-    props: ['name', 'abc'],
     mounted: function() {
         this.getVenues(0, 10);
     },

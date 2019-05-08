@@ -52,6 +52,7 @@ export default {
             this.errorMessage = message;
         },
         handleValidResponse: function(response) {
+            this.$cookies.set('auth_token', response.data.token);
             this.$router.push('/')
         },
         handleErrorResponse: function(error) {

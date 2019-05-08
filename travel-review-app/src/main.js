@@ -17,6 +17,22 @@ Vue.use(VueRouter);
 import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
 
+import VueCookies from 'vue-cookies';
+Vue.use(VueCookies);
+
+VueCookies.config('7d');
+
+VueCookies.set('theme', 'default');
+VueCookies.set('hover-time', '1s');
+
+// Add the auth token if the user has one.
+Vue.http.interceptors.push(function(request, next) {
+    if (this.$cookies.isKey('auth_token')) {
+        request.headers.set('X-Authorization', this.$cookies.get('auth_token'));
+    }
+    next();
+});
+
 const routes = [
   {
     path: "/",
