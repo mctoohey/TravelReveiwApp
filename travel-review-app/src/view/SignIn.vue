@@ -52,14 +52,23 @@ export default {
             this.errorMessage = message;
         },
         handleValidResponse: function(response) {
-            this.$cookies.set('auth_token', response.data.token);
+            this.$store.commit('setAuth', response.data.token);
             this.$router.push('/')
+            this.$http.get('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/' + response.data.userId).then(function (response2) {
+                let user = response2.data;
+                user.id = response.data.userId
+                this.$store.commit('setSignedInUser', user);
+            }, function(error) {
+                // TODO: Handle error.
+                console.log(error);
+            });
         },
         handleErrorResponse: function(error) {
             if (error.status === 400) {
                 this.displayError("Invalid email/username or password.");
             } else {
                 this.displayError("Opps. Something went wrong, try again later.");
+                console.log(error);
             }
             
         }

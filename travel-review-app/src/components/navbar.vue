@@ -11,8 +11,8 @@
                 </b-navbar-nav>
 
                 <b-navbar-nav class="ml-auto">
-                    <div v-if="shouldDisplayProfileBadge()">
-                        <b-dropdown text="User">
+                    <div v-if="userSignedIn">
+                        <b-dropdown :text="profileBadgeName">
                             <b-dropdown-item>View Profile</b-dropdown-item>
                             <b-dropdown-item @click="signOut()">Sign Out</b-dropdown-item>
                         </b-dropdown>
@@ -35,24 +35,32 @@ export default {
     methods: {
         shouldDisplaySignIn: function() {
             // TODO: Use a constant.
-            return this.$route.path != "/signin" && this.$route.path != '/signup' && !this.$cookies.isKey('auth_token');
-        },
-        shouldDisplayProfileBadge: function () {
-            return this.$cookies.isKey('auth_token');
+            return this.$route.path != "/signin" && this.$route.path != '/signup' && !this.userSignedIn;
         },
         signOut: function() {
             this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/logout', {}, {
                         "x-Authorization": this.$cookies.get('auth_token')
-                    }).then(function() {
-                        this.$cookies.remove('auth_token');
+                    }).then(function(response) {
+                        this.$store.commit('signUserOut');
                         this.$router.push('/');
-                        this.$forceUpdate();
-                    }, function() {
+                    }, function(error) {
                         // TODO: Handle error.
-                        this.$cookies.remove('auth_token');
+                        console.log(error);
+                        this.$store.commit('signUserOut');
                         this.$router.push('/');
-                        this.$forceUpdate();
                     });
+        }
+    },
+    computed: {
+        userSignedIn() {
+            return this.$store.getters.userSignedIn;
+        },
+        profileBadgeName() {
+            if (this.$store.state.signedInUser != null) {
+                return this.$store.state.signedInUser.givenName;
+            } else {
+                return "Profile";
+            }
         }
     }
 }

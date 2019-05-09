@@ -17,6 +17,9 @@ Vue.use(VueRouter);
 import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
 
+import Vuex from 'vuex';
+Vue.use(Vuex);
+
 import VueCookies from 'vue-cookies';
 Vue.use(VueCookies);
 
@@ -27,10 +30,34 @@ VueCookies.set('hover-time', '1s');
 
 // Add the auth token if the user has one.
 Vue.http.interceptors.push(function(request, next) {
-    if (this.$cookies.isKey('auth_token')) {
-        request.headers.set('X-Authorization', this.$cookies.get('auth_token'));
+    if (this.$store.getters.userSignedIn) {
+        request.headers.set('X-Authorization', this.$store.state.authToken);
     }
     next();
+});
+
+const store = new Vuex.Store({
+    state: {
+        authToken: null,
+        signedInUser: null
+    },
+    mutations: {
+        setAuth(state, authToken) {
+            state.authToken = authToken;
+        },
+        signUserOut(state) {
+            state.authToken = null;
+            state.signedInUser = null;
+        },
+        setSignedInUser(state, user) {
+            state.signedInUser = user;
+        }
+    },
+    getters: {
+        userSignedIn: function(state) {
+            return state.authToken != null;
+        }
+    }
 });
 
 const routes = [
@@ -59,6 +86,7 @@ const router = new VueRouter({
 
 new Vue({
   el: '#app',
+  store,
   router: router,
   render: h => h(App)
 })
