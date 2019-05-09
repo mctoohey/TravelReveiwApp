@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import { requestSignIn, requestUser } from '../api.js';
 export default {
     data: function() {
         return {
@@ -33,18 +34,7 @@ export default {
             } else if (this.password === "") {
                 this.displayError("Please provide a password.")
             } else {
-                let isLoginEmail = this.login.includes('@');
-                if (isLoginEmail) {
-                    this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/login', {
-                        "email": this.login,
-                        "password": this.password
-                    }).then(this.handleValidResponse, this.handleErrorResponse);
-                } else {
-                    this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/login', {
-                        "username": this.login,
-                        "password": this.password
-                    }).then(this.handleValidResponse, this.handleErrorResponse);
-                }
+                requestSignIn(this.login, this.login, this.password).then(this.handleValidResponse, this.handleErrorResponse);
             }
         },
         displayError: function(message) {
@@ -52,15 +42,20 @@ export default {
             this.errorMessage = message;
         },
         handleValidResponse: function(response) {
-            this.$store.commit('setAuth', response.data.token);
-            this.$router.push('/')
-            this.$http.get('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/' + response.data.userId).then(function (response2) {
+            this.$cookies.set('authToken', response.data.token, '1d');
+            this.$cookies.set('userId', response.data.userId, '1d');
+            // TODO: Don't use this hack.
+            let outerThis = this;
+            requestUser(response.data.userId).then(function (response2) {
                 let user = response2.data;
                 user.id = response.data.userId
-                this.$store.commit('setSignedInUser', user);
+                outerThis.$store.commit('setSignedInUser', user);
+                outerThis.$store.commit('setAuth', response.data.token);
+                outerThis.$router.push('/');
             }, function(error) {
                 // TODO: Handle error.
                 console.log(error);
+                outerThis.$router.push('/');
             });
         },
         handleErrorResponse: function(error) {

@@ -8,10 +8,10 @@
                 <b-form-group label="Last name" v-bind:state="isValidLastName" invalid-feedback="You must provide a last name.">
                     <b-form-input v-model="lastName" placeholder="Last name" v-bind:state="isValidLastName"></b-form-input>
                 </b-form-group>
-                <b-form-group label="Username" v-bind:state="isValidUsername" invalid-feedback="Username should be between 1 and 64 alphanumeric characters.">
+                <b-form-group label="Username" v-bind:state="isValidUsername" :invalid-feedback=usernameErrorMessage>
                     <b-form-input v-model="username" placeholder="Username" v-bind:state="isValidUsername"></b-form-input>
                 </b-form-group>
-                <b-form-group label="Email" v-bind:state="isValidEmail" invalid-feedback="Invalid email address.">
+                <b-form-group label="Email" v-bind:state="isValidEmail" :invalid-feedback=emailErrorMessage>
                     <b-form-input v-model="email" placeholder="Email" v-bind:state="isValidEmail"></b-form-input>
                 </b-form-group>
                 <b-form-group label="Password" v-bind:state="isValidPassword" invalid-feedback="You must provide a password.">
@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import { requestSignIn, requestUser } from '../api.js';
 export default {
     data: function() {
         return {
@@ -45,10 +46,8 @@ export default {
             isValidPassword: null,
             isValidPasswordReentry: null,
 
-            usernameErrorMessage: "",
-            emailErrorMessage: "",
-            passwordErrorMessage: "",
-            passwordReentryErrorMessage: "",
+            usernameErrorMessage: "Username should be between 1 and 64 alphanumeric characters.",
+            emailErrorMessage: "Invalid email address."
         };
     },
     methods: {
@@ -71,7 +70,56 @@ export default {
                 this.isValidPassword = null;
             }
 
-            
+            if (!this.isValidUsername) {
+                this.usernameErrorMessage = "Username should be between 1 and 64 alphanumeric characters.";
+            }
+
+            if (!this.isValidEmail) {
+                this.emailErrorMessage = "Invalid email address.";
+            }
+
+            if (this.isValidFirstName && this.isValidLastName && this.isValidUsername && this.isValidEmail && this.isValidPassword && this.isValidPasswordReentry) {
+                this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users', {
+                    "username": this.username,
+                    "givenName": this.firstName,
+                    "familyName": this.lastName,
+                    "email": this.email,
+                    "password": this.password
+                }).then(function(response) {
+                        requestSignIn(this.username, this.email, this.password).then(this.handleValidSignInResponse, this.handleErrorSignInResponse);
+
+                    }, function(error) {
+                        if (error.status === 400) {
+                            this.isValidEmail = false;
+                            this.isValidUsername = false;
+                            this.usernameErrorMessage = "Username or Email address is taken.";
+                            this.emailErrorMessage = "Username or Email address is taken.";
+                        } else {
+                            // this.displayError("Opps. Something went wrong, try again later.");
+                            console.log(error);
+                        }
+                    });
+            }
+        },
+        handleValidSignInResponse: function(response) {
+            this.$cookies.set('authToken', response.data.token, '1d');
+            this.$cookies.set('userId', response.data.userId, '1d');
+            // TODO: Don't use this hack.
+            let outerThis = this;
+            requestUser(response.data.userId).then(function (response2) {
+                let user = response2.data;
+                user.id = response.data.userId
+                outerThis.$store.commit('setSignedInUser', user);
+                outerThis.$store.commit('setAuth', response.data.token);
+                outerThis.$router.push('/');
+            }, function(error) {
+                // TODO: Handle error.
+                console.log(error);
+                outerThis.$router.push('/');
+            });
+        },
+        handleErrorSignInResponse: function(error) {
+            console.log(error);
         }
     }
 }

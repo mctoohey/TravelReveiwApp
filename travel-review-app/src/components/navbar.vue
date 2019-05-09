@@ -38,17 +38,19 @@ export default {
             return this.$route.path != "/signin" && this.$route.path != '/signup' && !this.userSignedIn;
         },
         signOut: function() {
-            this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/logout', {}, {
-                        "x-Authorization": this.$cookies.get('auth_token')
-                    }).then(function(response) {
-                        this.$store.commit('signUserOut');
-                        this.$router.push('/');
+            this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/logout').then(function(response) {
+                        this.purgeUserData()
                     }, function(error) {
                         // TODO: Handle error.
                         console.log(error);
-                        this.$store.commit('signUserOut');
-                        this.$router.push('/');
+                        this.purgeUserData()
                     });
+        },
+        purgeUserData: function() {
+            this.$store.commit('signUserOut');
+            this.$cookies.remove('authToken');
+            this.$cookies.remove('userId');
+            this.$router.push('/');
         }
     },
     computed: {
