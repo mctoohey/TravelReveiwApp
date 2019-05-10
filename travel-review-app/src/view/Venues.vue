@@ -4,7 +4,7 @@
             <b-container fluid class="mt-4" v-for="venue in this.venues">
                 <b-card :title="venue.venueName" sub-title="Accomadation" :img-src="`http://csse-s365.canterbury.ac.nz:4001/api/v1/venues/${venue.venueId}/photos/${venue.primaryPhoto}`" img-alt="Image not found" img-right img-height="150">
                     <b-card-text>{{ venue.city }}</b-card-text>
-                    <b-badge pill variant="secondary">
+                    <b-badge pill variant="dark">
                         <template v-if="venue.meanStarRating != null">
                             <template v-for="i in 5">
                                 <v-icon v-if="venue.meanStarRating-i >= -0.25" name="star" class="starChecked" scale="1.5"/>
@@ -19,7 +19,7 @@
                         <span v-else>This venue has no reviews yet.</span>
                     </b-badge>
 
-                    <b-badge pill variant="secondary">
+                    <b-badge pill variant="dark">
                         <template v-if="venue.modeCostRating != null">
                             <template v-for="i in 4">
                                 <v-icon v-if="venue.modeCostRating-i >= -0.5" name="dollar-sign" class="dollarChecked" scale="1.5"/>
