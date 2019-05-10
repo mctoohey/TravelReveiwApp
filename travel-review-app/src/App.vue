@@ -22,7 +22,8 @@ export default {
 
 <style>
 
-body { padding-top: 60px; }
+body { padding-top: 56px;}
+html {padding: 0; margin: 0;}
 
 .center {
   margin: 0;

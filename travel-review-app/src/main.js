@@ -45,7 +45,6 @@ if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
             }, function(error) {
                 // TODO: Handle error.
                 console.log(error);
-                store.commit('setAuth', $cookies.get('authToken'));
             });
 }
 

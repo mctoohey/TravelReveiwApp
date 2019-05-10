@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-navbar toggleable="lg" type="dark" variant="info" fixed="top">
+        <b-navbar toggleable="lg" type="dark" variant="info" fixed="top"> 
             <b-navbar-brand to="/" class="pull-left">Home</b-navbar-brand>
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
