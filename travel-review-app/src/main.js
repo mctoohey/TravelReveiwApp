@@ -12,6 +12,9 @@ Vue.use(VueResource);
 import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
 
+import Icon from 'vue-awesome/components/Icon';
+Vue.component('v-icon', Icon);
+
 import VueCookies from 'vue-cookies';
 Vue.use(VueCookies);
 
