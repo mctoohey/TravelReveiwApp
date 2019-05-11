@@ -1,15 +1,39 @@
 import Vue from 'vue';
 
-const baseURL = 'http://csse-s365.canterbury.ac.nz:4001/api/v1/';
+const baseURL = 'http://localhost:4941/api/v1';
 
-export function requestSignIn(username, email, password) {
-    return Vue.http.post(baseURL+'users/login', {
-                        "username": username,
-                        "email": email,
-                        "password": password
-                    });
+export const Api = {
+    requestSignIn(username, email, password) {
+        return Vue.http.post(baseURL+'/users/login', {
+                            "username": username,
+                            "email": email,
+                            "password": password
+                        });
+    },
+    
+    requestSignOut() {
+        return Vue.http.post(baseURL+'/users/logout');
+    },
+    
+    requestUser(id) {
+        return Vue.http.get(baseURL+'/users/' + id);
+    },
+    
+    requestCreateUser(user) {
+        return Vue.http.post(baseURL+'/users', user);
+    },
+
+    requestVenues(requestParams) {
+        return Vue.http.get(baseURL+'/venues', {params: requestParams});
+    },
+
+    requestCategory() {
+        return Vue.http.get(baseURL+'/categories');
+    },
+
+    getVenuePhotoUrl(venueId, photoId) {
+        return baseURL+`/venues/${venueId}/photos/${photoId}`;
+    }
 }
 
-export function requestUser(id) {
-    return Vue.http.get(baseURL+'users/' + id);
-}
+export default Api;

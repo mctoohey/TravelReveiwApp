@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { requestSignIn, requestUser } from '../api.js';
+import Api from '../api.js';
 export default {
     data: function() {
         return {
@@ -79,47 +79,43 @@ export default {
             }
 
             if (this.isValidFirstName && this.isValidLastName && this.isValidUsername && this.isValidEmail && this.isValidPassword && this.isValidPasswordReentry) {
-                this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users', {
+                Api.requestCreateUser({
                     "username": this.username,
                     "givenName": this.firstName,
                     "familyName": this.lastName,
                     "email": this.email,
                     "password": this.password
-                }).then(function(response) {
-                        requestSignIn(this.username, this.email, this.password).then(this.handleValidSignInResponse, this.handleErrorSignInResponse);
-
-                    }, function(error) {
-                        if (error.status === 400) {
-                            this.isValidEmail = false;
-                            this.isValidUsername = false;
-                            this.usernameErrorMessage = "Username or Email address is taken.";
-                            this.emailErrorMessage = "Username or Email address is taken.";
-                        } else {
-                            // this.displayError("Opps. Something went wrong, try again later.");
+                }).then((response) => {
+                        Api.requestSignIn(this.username, this.email, this.password).then((response) => {
+                            this.$cookies.set('authToken', response.data.token, '1d');
+                            this.$cookies.set('userId', response.data.userId, '1d');
+                            // TODO: Don't use this hack.
+                            let outerThis = this;
+                            Api.requestUser(response.data.userId).then((response2) => {
+                                let user = response2.data;
+                                user.id = response.data.userId
+                                outerThis.$store.commit('setSignedInUser', user);
+                                outerThis.$store.commit('setAuth', response.data.token);
+                                outerThis.$router.push('/');
+                            }).catch((error) => {
+                                // TODO: Handle error.
+                                console.log(error);
+                                outerThis.$router.push('/');
+                            });
+                        }).catch((error) => {
                             console.log(error);
-                        }
-                    });
+                        });
+                }).catch((error) => {
+                    if (error.status === 400) {
+                        this.isValidEmail = false;
+                        this.isValidUsername = false;
+                        this.usernameErrorMessage = "Username or Email address is taken.";
+                        this.emailErrorMessage = "Username or Email address is taken.";
+                    } else {
+                        console.log(error);
+                    }
+                });
             }
-        },
-        handleValidSignInResponse: function(response) {
-            this.$cookies.set('authToken', response.data.token, '1d');
-            this.$cookies.set('userId', response.data.userId, '1d');
-            // TODO: Don't use this hack.
-            let outerThis = this;
-            requestUser(response.data.userId).then(function (response2) {
-                let user = response2.data;
-                user.id = response.data.userId
-                outerThis.$store.commit('setSignedInUser', user);
-                outerThis.$store.commit('setAuth', response.data.token);
-                outerThis.$router.push('/');
-            }, function(error) {
-                // TODO: Handle error.
-                console.log(error);
-                outerThis.$router.push('/');
-            });
-        },
-        handleErrorSignInResponse: function(error) {
-            console.log(error);
         }
     }
 }

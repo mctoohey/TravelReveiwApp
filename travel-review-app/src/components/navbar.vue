@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import Api from '../api.js';
 export default {
     data: function() {
         return {
@@ -38,13 +39,14 @@ export default {
             return this.$route.path != "/signin" && this.$route.path != '/signup' && !this.userSignedIn;
         },
         signOut: function() {
-            this.$http.post('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/logout').then(function(response) {
+            Api.requestSignOut().then((response) => {
+                        console.log(this)
                         this.purgeUserData()
-                    }, function(error) {
+            }).catch((error) => {
                         // TODO: Handle error.
                         console.log(error);
                         this.purgeUserData()
-                    });
+            });
         },
         purgeUserData: function() {
             this.$store.commit('signUserOut');

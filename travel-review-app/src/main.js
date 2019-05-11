@@ -2,6 +2,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import { createRouter } from './router.js';
 import { createStore } from './store.js';
+import { initApi, Api } from './api.js';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
@@ -14,6 +15,9 @@ Vue.use(BootstrapVue);
 
 import Icon from 'vue-awesome/components/Icon';
 Vue.component('v-icon', Icon);
+
+import VueGeolocation from 'vue-browser-geolocation';
+Vue.use(VueGeolocation);
 
 import VueCookies from 'vue-cookies';
 Vue.use(VueCookies);
@@ -37,12 +41,12 @@ Vue.http.interceptors.push(function(request, next) {
 // Check if the user is signed in if the page has been reloaded.
 if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
     // TODO: Move this some where an reuse code from sign in.
-    Vue.http.get('http://csse-s365.canterbury.ac.nz:4001/api/v1/users/' + $cookies.get('userId')).then(function (response) {
+    Api.requestUser($cookies.get('userId')).then((response) => {
                 let user = response.data;
                 user.id = $cookies.get('authToken');
                 store.commit('setSignedInUser', user);
                 store.commit('setAuth', $cookies.get('authToken'));
-            }, function(error) {
+            }).catch((error) => {
                 // TODO: Handle error.
                 console.log(error);
             });

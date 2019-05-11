@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { requestSignIn, requestUser } from '../api.js';
+import Api from '../api.js';
 export default {
     data: function() {
         return {
@@ -34,38 +34,34 @@ export default {
             } else if (this.password === "") {
                 this.displayError("Please provide a password.")
             } else {
-                requestSignIn(this.login, this.login, this.password).then(this.handleValidResponse, this.handleErrorResponse);
+                Api.requestSignIn(this.login, this.login, this.password).then((response) => {
+                    this.$cookies.set('authToken', response.data.token, '1d');
+                    this.$cookies.set('userId', response.data.userId, '1d');
+                    // TODO: Don't use this hack.
+                    Api.requestUser(response.data.userId).then((response2) => {
+                        let user = response2.data;
+                        user.id = response.data.userId
+                        this.$store.commit('setSignedInUser', user);
+                        this.$store.commit('setAuth', response.data.token);
+                        this.$router.push('/');
+                    }, (error) => {
+                        // TODO: Handle error.
+                        console.log(error);
+                        this.$router.push('/');
+                    })
+                }).catch((error) => {
+                    console.log(this.login)
+                    if (error.status === 400) {
+                        this.displayError("Invalid email/username or password.");
+                    } else {
+                        this.displayError("Opps. Something went wrong, try again later.");
+                        console.log(error);
+                    }});
             }
         },
         displayError: function(message) {
             this.errorFlag = true;
             this.errorMessage = message;
-        },
-        handleValidResponse: function(response) {
-            this.$cookies.set('authToken', response.data.token, '1d');
-            this.$cookies.set('userId', response.data.userId, '1d');
-            // TODO: Don't use this hack.
-            let outerThis = this;
-            requestUser(response.data.userId).then(function (response2) {
-                let user = response2.data;
-                user.id = response.data.userId
-                outerThis.$store.commit('setSignedInUser', user);
-                outerThis.$store.commit('setAuth', response.data.token);
-                outerThis.$router.push('/');
-            }, function(error) {
-                // TODO: Handle error.
-                console.log(error);
-                outerThis.$router.push('/');
-            });
-        },
-        handleErrorResponse: function(error) {
-            if (error.status === 400) {
-                this.displayError("Invalid email/username or password.");
-            } else {
-                this.displayError("Opps. Something went wrong, try again later.");
-                console.log(error);
-            }
-            
         }
     }
 }
