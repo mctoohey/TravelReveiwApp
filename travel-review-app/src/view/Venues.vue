@@ -13,13 +13,13 @@
                             <b-badge pill variant="dark">
                                 <template v-if="venue.meanStarRating != null">
                                     <template v-for="i in 5">
-                                        <v-icon v-if="venue.meanStarRating-i >= -0.25" name="star" class="starChecked" scale="1.5"/>
+                                        <v-icon v-if="venue.meanStarRating-i >= -0.25" name="star" class="starChecked" scale="1.5" :style="starStyle"/>
                     
-                                        <v-icon v-else-if="venue.meanStarRating-i >= -0.75" scale="1.5">
-                                            <v-icon name="star"/>
-                                            <v-icon name="star-half" class="starChecked"/>
+                                        <v-icon v-else-if="venue.meanStarRating-i >= -0.75" scale="1.5" :style="starStyle">
+                                            <v-icon name="star" :style="starStyle"/>
+                                            <v-icon name="star-half" class="starChecked" :style="starStyle"/>
                                         </v-icon>
-                                        <v-icon v-else name="star" scale="1.5"/>
+                                        <v-icon v-else name="star" scale="1.5" :style="starStyle"/>
                                     </template>
                                 </template>
                                 <span v-else>This venue has no reviews yet.</span>
@@ -28,8 +28,8 @@
                             <b-badge pill variant="dark">
                                 <template v-if="venue.modeCostRating != null">
                                     <template v-for="i in 4">
-                                        <v-icon v-if="venue.modeCostRating-i >= -0.5" name="dollar-sign" class="dollarChecked" scale="1.5"/>
-                                        <v-icon v-else name="dollar-sign" scale="1.5"/>
+                                        <v-icon v-if="venue.modeCostRating-i >= -0.5" name="dollar-sign" class="dollarChecked" scale="1.5" :style="dollarStyle"/>
+                                        <v-icon v-else name="dollar-sign" scale="1.5" :style="dollarStyle"/>
                                     </template>
                                 </template>
                                 <span v-else>This venue has no reviews yet.</span>
@@ -59,6 +59,32 @@
                 <b-form-group label="Sort by">
                     <b-form-select v-model="selectedSortBy" :options="sortByOptions"></b-form-select>
                 </b-form-group>
+                <b-form-group label="Minimum star rating" style="max-width: 250px">
+                    <b-form-input v-model="minStarRating" type="range" min="0" max="5" step="0.5"></b-form-input>
+                    <b-container style="display: flex; padding: 0">
+                    <template v-for="i in 5">
+                        <div style="text-align: center; width: 20%;">
+                        <v-icon v-if="minStarRating-i >= -0.25" name="star" class="starChecked" scale="2"/>
+                        <v-icon v-else-if="minStarRating-i >= -0.75" scale="2">
+                            <v-icon name="star" :style="starStyle"/>
+                            <v-icon name="star-half" class="starChecked"/>
+                        </v-icon>
+                        <v-icon v-else name="star" scale="2"/>
+                        </div>
+                     </template>
+                    </b-container>
+                </b-form-group>
+                <b-form-group label="Maximum cost rating" style="max-width: 250px">
+                    <b-form-input v-model="maxCostRating" type="range" min="0" max="4"></b-form-input>
+                    <b-container style="display: flex; padding: 0">
+                        <template v-for="i in 4">
+                            <div style="text-align: center; width: 25%;">
+                                <v-icon v-if="maxCostRating-i >= -0.5" name="dollar-sign" class="dollarChecked" scale="2" :style="dollarStyle"/>
+                                <v-icon v-else name="dollar-sign" scale="2" :style="dollarStyle"/>
+                            </div>
+                        </template>
+                    </b-container>
+                </b-form-group>
                 <b-button @click="search()" style="margin-bottom: 20px">Search</b-button>
                 <b-alert v-model="errorFlag" dismissible variant="danger">{{ errorMessage }}</b-alert>
             </b-container>
@@ -85,6 +111,8 @@ export default {
                 "categoryId": null,
                 "q": null
             },
+            minStarRating: 0,
+            maxCostRating: 4,
             sortByOptions: [
                 {value: ["STAR_RATING", false], text: 'Mean Star Rating: High to Low'},
                 {value: ["STAR_RATING", true], text: 'Mean Star Rating: Low to High'},
@@ -94,11 +122,15 @@ export default {
                 {value: ["DISTANCE", true], text: 'Distance: High to Low'}
             ],
             selectedSortBy: ["STAR_RATING", false],
+
             errorFlag: false,
             errorMessage: "",
 
             currentPage: 1,
-            perPage: 10
+            perPage: 10,
+
+            dollarStyle: {'margin-left': '5px', 'margin-right': '5px'},
+            starStyle: {'margin-left': '1px', 'margin-right': '1px', 'margin-top': '1px', 'margin-bottom': '1px'},
         };
     },
     computed: {
@@ -174,6 +206,13 @@ export default {
             }
             query.sortBy = this.selectedSortBy[0];
             query.reverseSort = this.selectedSortBy[1];
+            if (this.minStarRating >= 1) {
+                query.minStarRating = this.minStarRating;
+            }
+            // TODO: Remove this.
+            if (this.maxCostRating < 4) {
+                query.maxCostRating = this.maxCostRating;
+            }
             return query;
         },
         getCityOptions() {
