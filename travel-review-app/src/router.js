@@ -38,6 +38,14 @@ const routes = [
         }
     },
     {
+        path: "/venues/:venueId/edit",
+        name: "EditVenue",
+        component: CreateVenue,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
       path: "/signin",
       component: SignIn
     },

@@ -106,6 +106,9 @@ export default {
     },
     mounted: function() {
         this.getCategories();
+        if (this.editing) {
+            this.getEditVenue();
+        }
     },
     methods: {
         getCategories() {
@@ -115,6 +118,12 @@ export default {
                 // TODO: Handle error.
                 console.log(error);
             });
+        },
+        getEditVenue() {
+            // TODO
+            Api.requestVenue(this.$route.params.venueId).then((response) => {
+
+            }).catch((error))
         },
         addVenue() {
             this.isValidVenueName =  this.venue.venueName != "";
@@ -187,6 +196,9 @@ export default {
                 options.push({value: category.categoryId, text: category.categoryName})
             }
             return options;
+        },
+        editing: function() {
+            return this.$route.name === "EditVenue";
         }
     }
 }
