@@ -27,6 +27,14 @@ export const Api = {
         return Vue.http.get(baseURL+'/venues', {params: requestParams});
     },
 
+    requestVenue(venueId) {
+        return Vue.http.get(baseURL+`/venues/${venueId}`);
+    },
+
+    requestVenueReviews(venueId) {
+        return Vue.http.get(baseURL+`/venues/${venueId}/reviews`);
+    },
+
     requestCategory() {
         return Vue.http.get(baseURL+'/categories');
     },

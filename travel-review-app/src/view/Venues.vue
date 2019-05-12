@@ -8,29 +8,20 @@
                 <b-container fluid>
                     <h4><b-badge pill variant="light">Showing venues {{venuesStartIndex}} to {{venuesEndIndex}}</b-badge></h4>
                     <b-container fluid style="margin-bottom: 20px" v-for="venue in this.displayedVenues" v-bind:key="venue.venueId">
-                        <b-card :title="venue.venueName" :sub-title="categoryName(venue.categoryId)" :img-src="venueImageSrc(venue)" img-alt="Image not found" img-right img-height="150">
+                        <b-card :img-src="venueImageSrc(venue)" img-alt="Image not found" img-right img-height="150">
+                            <b-card-title ><b-link :to="`/venues/${venue.venueId}`" class="card-link">{{ venue.venueName }}</b-link></b-card-title>
+                            <b-card-sub-title>{{ categoryName(venue.categoryId) }}</b-card-sub-title>
                             <b-card-text>{{ venueLocationText(venue) }}</b-card-text>
-                            <b-badge pill variant="dark">
+                            <b-badge pill variant="dark" style="margin: 4px">
                                 <template v-if="venue.meanStarRating != null">
-                                    <template v-for="i in 5">
-                                        <v-icon v-if="venue.meanStarRating-i >= -0.25" name="star" class="starChecked" scale="1.5" :style="starStyle"/>
-                    
-                                        <v-icon v-else-if="venue.meanStarRating-i >= -0.75" scale="1.5" :style="starStyle">
-                                            <v-icon name="star" :style="starStyle"/>
-                                            <v-icon name="star-half" class="starChecked" :style="starStyle"/>
-                                        </v-icon>
-                                        <v-icon v-else name="star" scale="1.5" :style="starStyle"/>
-                                    </template>
+                                    <star-rating style="width: 120px; padding: 2px;" iconScale="1.5" :stars="Number(venue.meanStarRating)"></star-rating>
                                 </template>
                                 <span v-else>This venue has no reviews yet.</span>
                             </b-badge>
 
                             <b-badge pill variant="dark">
                                 <template v-if="venue.modeCostRating != null">
-                                    <template v-for="i in 4">
-                                        <v-icon v-if="venue.modeCostRating-i >= -0.5" name="dollar-sign" class="dollarChecked" scale="1.5" :style="dollarStyle"/>
-                                        <v-icon v-else name="dollar-sign" scale="1.5" :style="dollarStyle"/>
-                                    </template>
+                                    <cost-rating style="width: 120px;" iconScale="1.5" :costRating="Number(venue.modeCostRating)"></cost-rating>
                                 </template>
                                 <span v-else>This venue has no reviews yet.</span>
                             </b-badge>
@@ -60,30 +51,12 @@
                     <b-form-select v-model="selectedSortBy" :options="sortByOptions"></b-form-select>
                 </b-form-group>
                 <b-form-group label="Minimum star rating" style="max-width: 250px">
-                    <b-form-input v-model="minStarRating" type="range" min="0" max="5" step="0.5"></b-form-input>
-                    <b-container style="display: flex; padding: 0">
-                    <template v-for="i in 5">
-                        <div style="text-align: center; width: 20%;">
-                        <v-icon v-if="minStarRating-i >= -0.25" name="star" class="starChecked" scale="2"/>
-                        <v-icon v-else-if="minStarRating-i >= -0.75" scale="2">
-                            <v-icon name="star" :style="starStyle"/>
-                            <v-icon name="star-half" class="starChecked"/>
-                        </v-icon>
-                        <v-icon v-else name="star" scale="2"/>
-                        </div>
-                     </template>
-                    </b-container>
+                    <b-form-input v-model="minStarRating" type="range" min="0" max="5"></b-form-input>
+                    <star-rating iconScale="2" :stars="Number(minStarRating)"></star-rating>
                 </b-form-group>
                 <b-form-group label="Maximum cost rating" style="max-width: 250px">
                     <b-form-input v-model="maxCostRating" type="range" min="0" max="4"></b-form-input>
-                    <b-container style="display: flex; padding: 0">
-                        <template v-for="i in 4">
-                            <div style="text-align: center; width: 25%;">
-                                <v-icon v-if="maxCostRating-i >= -0.5" name="dollar-sign" class="dollarChecked" scale="2" :style="dollarStyle"/>
-                                <v-icon v-else name="dollar-sign" scale="2" :style="dollarStyle"/>
-                            </div>
-                        </template>
-                    </b-container>
+                    <cost-rating iconScale="2" :costRating="Number(maxCostRating)"></cost-rating>
                 </b-form-group>
                 <b-button @click="search()" style="margin-bottom: 20px">Search</b-button>
                 <b-alert v-model="errorFlag" dismissible variant="danger">{{ errorMessage }}</b-alert>
@@ -95,9 +68,8 @@
 </template>
 
 <script>
-import 'vue-awesome/icons/dollar-sign';
-import 'vue-awesome/icons/star-half';
-import 'vue-awesome/icons/star';
+import starRating from '../components/StarRating.vue';
+import costRating from '../components/CostRating.vue';
 import { Scrolly, ScrollyViewport, ScrollyBar } from 'vue-scrolly';
 import Api from '../api.js';
 export default {
@@ -127,10 +99,7 @@ export default {
             errorMessage: "",
 
             currentPage: 1,
-            perPage: 10,
-
-            dollarStyle: {'margin-left': '5px', 'margin-right': '5px'},
-            starStyle: {'margin-left': '1px', 'margin-right': '1px', 'margin-top': '1px', 'margin-bottom': '1px'},
+            perPage: 10
         };
     },
     computed: {
@@ -275,19 +244,10 @@ export default {
     components: {
         Scrolly,
         ScrollyViewport,
-        ScrollyBar
+        ScrollyBar,
+        starRating,
+        costRating
     }
 }
 </script>
-
-<style>
-.starChecked {
-  color: orange;
-}
-
-.dollarChecked {
-  color: green;
-}
-</style>
-
 

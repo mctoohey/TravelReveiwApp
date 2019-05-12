@@ -1,6 +1,7 @@
 import Vue from 'vue';
 
 import Venues from './view/Venues.vue'
+import Venue from './view/Venue.vue'
 import Home from './view/Home.vue'
 import SignUp from './view/SignUp'
 import SignIn from './view/SignIn'
@@ -16,6 +17,10 @@ const routes = [
     {
       path: "/venues",
       component: Venues
+    },
+    {
+        path: "/venues/:venueId",
+        component: Venue
     },
     {
       path: "/signin",
