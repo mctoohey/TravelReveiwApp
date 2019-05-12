@@ -59,7 +59,7 @@ export default {
     },
     computed: {
         userSignedIn() {
-            return this.$store.getters.userSignedIn;
+            return this.$store.getters.userSignedIn && this.$store.state.signedInUser != null;
         },
         profileBadgeName() {
             if (this.$store.state.signedInUser != null) {

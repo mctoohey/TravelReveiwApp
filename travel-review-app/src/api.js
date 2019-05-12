@@ -39,6 +39,14 @@ export const Api = {
         return Vue.http.post(baseURL+`/venues`, venue);
     },
 
+    requetsAddVenuePhoto(venueId, photo, isPrimary, description) {
+        let formData = new FormData();
+        formData.append('photo', photo);
+        formData.append('description', description);
+        formData.append('makePrimary', isPrimary);
+        return Vue.http.post(baseURL+`/venues/${venueId}/photos`, formData);
+    },
+
     requestCategories() {
         return Vue.http.get(baseURL+'/categories');
     },

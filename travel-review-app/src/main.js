@@ -41,11 +41,11 @@ Vue.http.interceptors.push(function(request, next) {
 // Check if the user is signed in if the page has been reloaded.
 if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
     // TODO: Move this some where an reuse code from sign in.
+    store.commit('setAuth', $cookies.get('authToken'));
     Api.requestUser($cookies.get('userId')).then((response) => {
                 let user = response.data;
-                user.id = $cookies.get('authToken');
+                user.id = $cookies.get('userId');
                 store.commit('setSignedInUser', user);
-                store.commit('setAuth', $cookies.get('authToken'));
             }).catch((error) => {
                 // TODO: Handle error.
                 console.log(error);

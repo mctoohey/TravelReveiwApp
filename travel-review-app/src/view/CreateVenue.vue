@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-container class="center" style="max-width: 45rem;">
+        <b-container class="center" style="max-width: 50rem;">
             <b-card title="Create Venue">
                 <b-row>
                     <b-col>
@@ -42,16 +42,21 @@
                     <b-col>
                         <b-form-group label="Photos">
                             <b-card>
-                                <b-form-file v-model="photos" multiple></b-form-file>
-                                <b-button @click="addPhotos()" style="margin-top: 5px; margin-bottom: 5px">Add Photos</b-button>
+                                <b-form-group :state="isValidPhotos" invalid-feedback="No files selected.">
+                                    <b-form-file v-model="photos" multiple :file-name-formatter="formatFileBoxMessage" accept="image/jpeg, image/png" :state="isValidPhotos"></b-form-file>
+                                </b-form-group>
+                                <b-button @click="addPhotos()" style="margin-bottom: 15px">Add Selected Photos</b-button>
                                 <b-card>
-                                <b-button-group v-for="i in addedPhotos.length" v-bind:key="i" :id="`photo${i}`">
-                                   <b-button>Make Primary</b-button>
-                                   <b-button variant="danger">Remove</b-button>
-                                </b-button-group>
+                                <template v-for="i in addedPhotos.length">
+                                    <b-button-group style="margin-bottom: 10px" :id="`photo${i}`" size="sm" v-bind:key="i*addedPhotos.length+primaryPhoto">
+                                        <b-button :pressed="true" style="outline: none; box-shadow: none; cursor: default;" variant="light">Photo #{{ i }}</b-button>
+                                        <b-button @click="removePhoto(i-1)" variant="danger">Remove</b-button>
+                                        <b-button @click="primaryPhoto=i" :variant="i != primaryPhoto ? 'outline-primary' : 'primary'">{{i != primaryPhoto ? 'Make Primary' :  'Primary Photo'}}</b-button>
+                                    </b-button-group>
+                                </template>
                                 </b-card>
-                                <b-popover v-for="i in addedPhotos.length" v-bind:key="i" :target="`photo${i}`" triggers="hover focus" title="Preview" placement="top">
-                                    <b-img :src="getPreview(i-1)" height="100"></b-img>
+                                <b-popover v-for="i in addedPhotos.length" v-bind:key="i*addedPhotos.length+primaryPhoto" :target="`photo${i}`" triggers="hover" title="Preview" placement="left" no-fade>
+                                    <b-img :src="getPreview(i-1)" height="100" style="max-width: 250px"></b-img>
                                 </b-popover>
                             </b-card>
                         </b-form-group>
@@ -89,8 +94,11 @@ export default {
             isValidLatitude: null,
             isValidLongitude: null,
 
+            isValidPhotos: null,
+
             photos: [],
             addedPhotos: [],
+            primaryPhoto: 1, 
 
             errorTitle: "Error",
             errorMessage: "An error has occured."
@@ -121,6 +129,16 @@ export default {
                 this.venue.longitude = Number(this.venue.longitude);
                 Api.requestCreateVenue(this.venue).then((response) => {
                     this.$router.push('/');
+                    let venueId = response.data.venueId;
+                    let photoNumber = 1;
+                    for (let photo of this.addedPhotos) {
+                        console.log(photoNumber === this.primaryPhoto);
+                        Api.requetsAddVenuePhoto(venueId, photo, photoNumber === this.primaryPhoto, "").then().catch((error) => {
+                            // TODO: Handle error;
+                            console.log(error);
+                        });
+                        photoNumber += 1;
+                    }
                 }).catch((error) => {
                     if (error.status === 401) {
                         this.createErrorModal("Authentication Error!", "You must be logged in to create a venue.");
@@ -131,10 +149,24 @@ export default {
             }
         },
         addPhotos() {
-            for (let photo of this.photos) {
-                this.addedPhotos.push(photo);
+            if (this.photos.length === 0) {
+                this.isValidPhotos = false;
+            } else {
+                for (let photo of this.photos) {
+                    this.addedPhotos.push(photo);
+                }
+                this.photos = [];
+                this.isValidPhotos = null;
+            }  
+        },
+        removePhoto(index) {
+            this.addedPhotos.splice(index, 1);
+            if (this.primaryPhoto-1 === index) {
+                this.primaryPhoto = 1;
+            } else if (index < this.primaryPhoto-1) {
+                console.log("fasf")
+                this.primaryPhoto -= 1;
             }
-            this.photos = [];
         },
         getPreview: function(index) {
             if (this.addedPhotos.length != 0) {
@@ -143,6 +175,9 @@ export default {
                 return "";
             }
             
+        },
+        formatFileBoxMessage(files) {
+            return `${files.length} photos selected`;
         }
     },
     computed: {
