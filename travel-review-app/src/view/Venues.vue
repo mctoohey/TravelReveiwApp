@@ -9,7 +9,7 @@
                     <h4><b-badge pill variant="light">Showing venues {{venuesStartIndex}} to {{venuesEndIndex}}</b-badge></h4>
                     <b-container fluid style="margin-bottom: 20px" v-for="venue in this.displayedVenues" v-bind:key="venue.venueId">
                         <b-card :img-src="venueImageSrc(venue)" img-alt="Image not found" img-right img-height="150">
-                            <b-card-title ><b-link :to="`/venues/${venue.venueId}`" class="card-link">{{ venue.venueName }}</b-link></b-card-title>
+                            <b-card-title ><b-link :to="`/venues/${venue.venueId}`" class="card-link">{{ venue.venueName }}</b-link><b-button v-if="isAdminPage" size="sm" variant="outline-success" style="margin-left: 15px; padding-top: 0px; padding-bottom: 0px">Edit</b-button></b-card-title>
                             <b-card-sub-title>{{ categoryName(venue.categoryId) }}</b-card-sub-title>
                             <b-card-text>{{ venueLocationText(venue) }}</b-card-text>
                             <b-badge pill variant="dark" style="margin: 4px">
@@ -28,7 +28,7 @@
                         </b-card>
                     </b-container>
                     <div v-if="this.currentPage >= this.totalPages" class="text-center">
-                        <h2><b-badge variant="light" align="center">There are no more venues to view</b-badge></h2>
+                        <h2><b-badge variant="light" align="center">{{ endOfVenuesMessage }}</b-badge></h2>
                     </div>
                     <b-pagination v-model="currentPage" :per-page="perPage" :total-rows="rows" align="center"></b-pagination>
                 </b-container>
@@ -139,6 +139,16 @@ export default {
         },
         displayedVenues: function() {
             return this.venues.slice(this.venuesStartIndex-1, this.venuesEndIndex);
+        },
+        endOfVenuesMessage: function() {
+            if (this.rows === 0) {
+                return "No venues found";
+            } else {
+                return "There are no more venues to view";
+            }
+        },
+        isAdminPage() {
+            return this.$route.path === "/admin/venues" && this.$store.getters.userSignedIn;
         }
     },
     mounted: function() {
@@ -185,6 +195,9 @@ export default {
             // TODO: Remove this.
             if (this.maxCostRating < 4) {
                 query.maxCostRating = this.maxCostRating;
+            }
+            if (this.isAdminPage) {
+                query.adminId = parseInt(this.$store.state.signedInUser.id);
             }
             return query;
         },

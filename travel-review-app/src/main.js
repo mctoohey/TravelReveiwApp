@@ -52,6 +52,16 @@ if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
             });
 }
 
+// Redirect requests to pages that require the user to be logged in.
+router.beforeEach((to, from, next) => { 
+    console.log(to.requiresAuth);   
+    if (to.meta.requiresAuth && !store.getters.userSignedIn) {
+      next('/signin');
+    } else {
+      next();
+    }
+  });
+
 // Add method for displaying errors in a modal.
 Vue.mixin({
     methods: {
@@ -69,7 +79,7 @@ Vue.mixin({
             });
         }
     }
-})
+});
 
 new Vue({
   el: '#app',

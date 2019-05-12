@@ -24,8 +24,18 @@ const routes = [
         component: Venue
     },
     {
+        path: "/admin/venues",
+        component: Venues,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
         path: "/create-venue",
-        component: CreateVenue
+        component: CreateVenue,
+        meta: {
+            requiresAuth: true
+        }
     },
     {
       path: "/signin",
@@ -38,8 +48,9 @@ const routes = [
 ];
 
 export function createRouter() {
-      return new VueRouter({
+        let router = new VueRouter({
         routes: routes,
         mode: 'history'
       });
+      return router;
 }
