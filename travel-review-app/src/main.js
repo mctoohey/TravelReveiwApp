@@ -52,6 +52,25 @@ if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
             });
 }
 
+// Add method for displaying errors in a modal.
+Vue.mixin({
+    methods: {
+        createErrorModal(message, errorTitle, route) {
+            if (errorTitle === undefined) errorTitle = "An error has occured!";
+            if (route === undefined) route = "/";
+
+            this.$bvModal.msgBoxConfirm(message, {
+                title: errorTitle,
+                centered: true
+            }).then((value) => {
+                this.$router.push(route);
+            }).catch((error) => {
+                this.$router.push(route);
+            });
+        }
+    }
+})
+
 new Vue({
   el: '#app',
   store,

@@ -13,6 +13,8 @@
                 <b-navbar-nav class="ml-auto">
                     <div v-if="userSignedIn">
                         <b-dropdown :text="profileBadgeName">
+                            <b-dropdown-item to="/create-venue">Add Venue</b-dropdown-item>
+                            <b-dropdown-divider></b-dropdown-divider>
                             <b-dropdown-item>View Profile</b-dropdown-item>
                             <b-dropdown-item @click="signOut()">Sign Out</b-dropdown-item>
                         </b-dropdown>
@@ -40,7 +42,6 @@ export default {
         },
         signOut: function() {
             Api.requestSignOut().then((response) => {
-                        console.log(this)
                         this.purgeUserData()
             }).catch((error) => {
                         // TODO: Handle error.

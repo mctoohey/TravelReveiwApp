@@ -90,17 +90,16 @@ export default {
                             this.$cookies.set('authToken', response.data.token, '1d');
                             this.$cookies.set('userId', response.data.userId, '1d');
                             // TODO: Don't use this hack.
-                            let outerThis = this;
                             Api.requestUser(response.data.userId).then((response2) => {
                                 let user = response2.data;
                                 user.id = response.data.userId
-                                outerThis.$store.commit('setSignedInUser', user);
-                                outerThis.$store.commit('setAuth', response.data.token);
-                                outerThis.$router.push('/');
+                                this.$store.commit('setSignedInUser', user);
+                                this.$store.commit('setAuth', response.data.token);
+                                this.$router.push('/');
                             }).catch((error) => {
                                 // TODO: Handle error.
                                 console.log(error);
-                                outerThis.$router.push('/');
+                                this.$router.push('/');
                             });
                         }).catch((error) => {
                             console.log(error);

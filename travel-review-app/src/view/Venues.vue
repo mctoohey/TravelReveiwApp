@@ -121,7 +121,11 @@ export default {
             return this.venues.length;
         },
         venuesStartIndex: function() {
-            return (this.currentPage-1) * this.perPage + 1;
+            if (this.rows === 0) {
+                return 0;
+            } else {
+                return (this.currentPage-1) * this.perPage + 1;
+            }
         },
         venuesEndIndex: function() {
             if (this.currentPage * this.perPage < this.rows) {
@@ -199,7 +203,7 @@ export default {
             });
         },
         getCategories() {
-            Api.requestCategory().then((response) => {
+            Api.requestCategories().then((response) => {
                 this.categories = response.data;
             }).catch((error) => {
                 // TODO: Handle error.

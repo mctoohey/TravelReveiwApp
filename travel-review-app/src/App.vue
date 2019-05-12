@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <navbar></navbar>
+    <nav-bar></nav-bar>
     <router-view></router-view>
   </div>
 </template>
 
 <script>
-import navbar from './components/navbar.vue'
+import NavBar from './components/NavBar.vue';
 export default {
   name: 'app',
   components: {
-      navbar
+      NavBar
   },
   data () {
     return {
@@ -26,7 +26,10 @@ body { padding-top: 56px;}
 html {padding: 0; margin: 0;}
 
 .center {
-  margin: 0;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  margin-top: 28px;
   position: absolute;
   top: 50%;
   left: 50%;

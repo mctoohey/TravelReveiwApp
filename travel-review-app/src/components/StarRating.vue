@@ -21,7 +21,8 @@ export default {
         return {
             
         }
-    }, props: {
+    }, 
+    props: {
                 'stars': {type: Number, default: 0}, 
                'iconScale': {type: String, default: "1"}
             }

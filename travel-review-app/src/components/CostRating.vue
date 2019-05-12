@@ -16,7 +16,8 @@ export default {
         return {
             
         }
-    }, props: {
+    }, 
+    props: {
                'costRating': {type: Number, default: 0}, 
                'iconScale': {type: String, default: "1"}
             }
