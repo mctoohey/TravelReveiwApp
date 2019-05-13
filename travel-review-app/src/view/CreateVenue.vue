@@ -100,6 +100,8 @@ export default {
             addedPhotos: [],
             primaryPhoto: 1, 
 
+            editVenuePhotos: [],
+
             errorTitle: "Error",
             errorMessage: "An error has occured."
         };
@@ -120,10 +122,24 @@ export default {
             });
         },
         getEditVenue() {
-            // TODO
             Api.requestVenue(this.$route.params.venueId).then((response) => {
+                let recievedVenue = response.data;
 
-            }).catch((error))
+                this.venue.venueName = recievedVenue.venueName;
+                this.venue.categoryId = recievedVenue.category.categoryId;
+                this.venue.city = recievedVenue.city;
+                this.venue.shortDescription = recievedVenue.shortDescription;
+                this.venue.longDescription = recievedVenue.longDescription;
+                this.venue.address = recievedVenue.address;
+                this.venue.latitude = recievedVenue.latitude;
+                this.venue.longitude = recievedVenue.longitude;
+                
+                this.editVenuePhotos = recievedVenue.photos;
+
+            }).catch((error) => {
+                // TODO: Handle error.
+                console.log(error);
+            });
         },
         addVenue() {
             this.isValidVenueName =  this.venue.venueName != "";
