@@ -53,8 +53,7 @@ if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
 }
 
 // Redirect requests to pages that require the user to be logged in.
-router.beforeEach((to, from, next) => { 
-    console.log(to.requiresAuth);   
+router.beforeEach((to, from, next) => {   
     if (to.meta.requiresAuth && !store.getters.userSignedIn) {
       next('/signin');
     } else {

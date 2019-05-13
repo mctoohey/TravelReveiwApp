@@ -51,6 +51,14 @@ export const Api = {
         return Vue.http.post(baseURL+`/venues/${venueId}/photos`, formData);
     },
 
+    requestRemoveVenuePhoto(venueId, photoName) {
+        return Vue.http.delete(baseURL+`/venues/${venueId}/photos/${photoName}`); 
+    },
+
+    requestSetPrimaryVenuePhoto(venueId, photoName) {
+        return Vue.http.post(baseURL+`/venues/${venueId}/photos/${photoName}/setPrimary`); 
+    },
+
     requestCategories() {
         return Vue.http.get(baseURL+'/categories');
     },

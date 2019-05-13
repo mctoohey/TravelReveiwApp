@@ -47,15 +47,15 @@
                                 </b-form-group>
                                 <b-button @click="addPhotos()" style="margin-bottom: 15px">Add Selected Photos</b-button>
                                 <b-card>
-                                <template v-for="i in addedPhotos.length">
-                                    <b-button-group style="margin-bottom: 10px" :id="`photo${i}`" size="sm" v-bind:key="i*addedPhotos.length+primaryPhoto">
+                                <template v-for="i in totalNumberPhotos">
+                                    <b-button-group style="margin-bottom: 10px" :id="`photo${i}`" size="sm" v-bind:key="i*totalNumberPhotos+primaryPhoto">
                                         <b-button :pressed="true" style="outline: none; box-shadow: none; cursor: default;" variant="light">Photo #{{ i }}</b-button>
                                         <b-button @click="removePhoto(i-1)" variant="danger">Remove</b-button>
                                         <b-button @click="primaryPhoto=i" :variant="i != primaryPhoto ? 'outline-primary' : 'primary'">{{i != primaryPhoto ? 'Make Primary' :  'Primary Photo'}}</b-button>
                                     </b-button-group>
                                 </template>
                                 </b-card>
-                                <b-popover v-for="i in addedPhotos.length" v-bind:key="i*addedPhotos.length+primaryPhoto" :target="`photo${i}`" triggers="hover" title="Preview" placement="left" no-fade>
+                                <b-popover v-for="i in totalNumberPhotos" v-bind:key="i*totalNumberPhotos+primaryPhoto" :target="`photo${i}`" triggers="hover" title="Preview" placement="left" no-fade>
                                     <b-img :src="getPreview(i-1)" height="100" style="max-width: 250px"></b-img>
                                 </b-popover>
                             </b-card>
@@ -63,7 +63,7 @@
                     </b-col>
                 </b-row>
                 <b-button @click="editing ? updateVenue() : addVenue()" :disabled="editing && !hasVenueChanged()">{{editing ? 'Update Venue' : 'Add Venue'}}</b-button>
-                <b-button v-if="editing" @click="resetEditFields()">Reset</b-button>
+                <b-button v-if="editing" @click="resetEdit()">Reset</b-button>
                 <b-button @click="$router.go(-1)" style="float: right">Back</b-button>
             </b-card>
         </b-container>
@@ -103,10 +103,9 @@ export default {
             addedPhotos: [],
             primaryPhoto: 1, 
 
-            editVenuePhotos: [],
-
-            errorTitle: "Error",
-            errorMessage: "An error has occured."
+            existingVenuePhotos: [],
+            originalVenuePhotos: [],
+            originalPrimaryPhoto: 1,
         };
     },
     mounted: function() {
@@ -147,7 +146,17 @@ export default {
                 this.originalVenue.latitude = recievedVenue.latitude;
                 this.originalVenue.longitude = recievedVenue.longitude;
                 
-                this.editVenuePhotos = recievedVenue.photos;
+                this.existingVenuePhotos = recievedVenue.photos;
+                this.originalVenuePhotos = [];
+                let i = 1;
+                for (let photo of recievedVenue.photos) {
+                    if (photo.isPrimary) {
+                        this.primaryPhoto = i;
+                    }
+                    i+= 1;
+                    this.originalVenuePhotos.push(photo);
+                }
+                this.originalPrimaryPhoto = this.primaryPhoto;
             }).catch((error) => {
                 // TODO: Handle error.
                 console.log(error);
@@ -183,6 +192,28 @@ export default {
                 this.venue.longitude = Number(this.venue.longitude);
                 Api.requestEditVenue(this.editVenueId, this.venue).then((response) => {
                     this.$router.push(`/venues/${this.editVenueId}`);
+                    let photoNumber = 1;
+                    for (let photo of this.addedPhotos) {
+                        Api.requetsAddVenuePhoto(this.editVenueId, photo, photoNumber === this.primaryPhoto, "").then().catch((error) => {
+                            // TODO: Handle error;
+                            console.log(error);
+                        });
+                        photoNumber += 1;
+                    }
+                    for (let photo of this.originalVenuePhotos) {
+                        if (!this.existingVenuePhotos.some(item => item.photoFilename === photo.photoFilename)) {
+                            Api.requestRemoveVenuePhoto(this.editVenueId, photo.photoFilename).catch((error) => {
+                                // TODO: Handle error;
+                                console.log(error);
+                            });
+                        }
+                    }
+                    if (this.primaryPhoto-1 < this.existingVenuePhotos) {
+                        Api.requestSetPrimaryVenuePhoto(this.editVenueId, this.existingVenuePhotos[this.primaryPhoto-1].photoFilename).catch((error) => {
+                            // TODO: Handle error;
+                            console.log(error);
+                        });
+                    }
                 }).catch((error) => {
                     // TODO: Handle error.
                     console.log(error);
@@ -201,7 +232,12 @@ export default {
             }  
         },
         removePhoto(index) {
-            this.addedPhotos.splice(index, 1);
+            if (index < this.existingVenuePhotos.length) {
+                this.existingVenuePhotos.splice(index, 1);
+            } else if (index < this.totalNumberPhotos) {
+                this.addedPhotos.splice(index-this.existingVenuePhotos.length, 1);
+            }
+            
             if (this.primaryPhoto-1 === index) {
                 this.primaryPhoto = 1;
             } else if (index < this.primaryPhoto-1) {
@@ -209,8 +245,10 @@ export default {
             }
         },
         getPreview: function(index) {
-            if (this.addedPhotos.length != 0) {
-                return window.URL.createObjectURL(this.addedPhotos[index]);
+            if (index < this.existingVenuePhotos.length) {
+                return Api.getVenuePhotoUrl(this.editVenueId, this.existingVenuePhotos[index].photoFilename);
+            } else if (index < this.totalNumberPhotos) {
+                return window.URL.createObjectURL(this.addedPhotos[index-this.existingVenuePhotos.length]);        
             } else {
                 return "";
             }
@@ -235,9 +273,12 @@ export default {
                     return true;
                 }
             }
+            if (this.originalVenuePhotos.length != this.existingVenuePhotos.length || this.addedPhotos.length > 0 || this.originalPrimaryPhoto != this.primaryPhoto) {
+                return true;
+            }
             return false;
         },
-        resetEditFields() {
+        resetEdit() {
             this.venue.venueName = this.originalVenue.venueName;
             this.venue.categoryId = this.originalVenue.categoryId;
             this.venue.city = this.originalVenue.city;
@@ -246,6 +287,13 @@ export default {
             this.venue.address = this.originalVenue.address;
             this.venue.latitude = this.originalVenue.latitude;
             this.venue.longitude = this.originalVenue.longitude;
+
+            this.existingVenuePhotos = [];
+            this.addedPhotos = [];
+            for (let photo of this.originalVenuePhotos) {
+                this.existingVenuePhotos.push(photo);
+            }
+            this.primaryPhoto = this.originalPrimaryPhoto;
         }
     },
     computed: {
@@ -261,6 +309,9 @@ export default {
         },
         editVenueId: function() {
             return this.$route.params.venueId;
+        },
+        totalNumberPhotos: function() {
+            return this.addedPhotos.length + this.existingVenuePhotos.length;
         }
     }
 }
