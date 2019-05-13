@@ -36,7 +36,11 @@ export const Api = {
     },
 
     requestCreateVenue(venue) {
-        return Vue.http.post(baseURL+`/venues`, venue);
+        return Vue.http.post(baseURL+'/venues', venue);
+    },
+
+    requestEditVenue(venueId, editValues) {
+        return Vue.http.patch(baseURL+`/venues/${venueId}`, editValues);
     },
 
     requetsAddVenuePhoto(venueId, photo, isPrimary, description) {

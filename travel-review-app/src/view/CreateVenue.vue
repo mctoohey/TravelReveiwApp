@@ -1,7 +1,7 @@
 <template>
     <div>
         <b-container class="center" style="max-width: 50rem;">
-            <b-card title="Create Venue">
+            <b-card :title="editing ? 'Edit Venue' : 'Create Venue'">
                 <b-row>
                     <b-col>
                         <b-form-group label="Venue name" v-bind:state="isValidVenueName" invalid-feedback="You must provide a venue name.">
@@ -62,7 +62,9 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-button @click="addVenue()">Add Venue</b-button>
+                <b-button @click="editing ? updateVenue() : addVenue()" :disabled="editing && !hasVenueChanged()">{{editing ? 'Update Venue' : 'Add Venue'}}</b-button>
+                <b-button v-if="editing" @click="resetEditFields()">Reset</b-button>
+                <b-button @click="$router.go(-1)" style="float: right">Back</b-button>
             </b-card>
         </b-container>
     </div>
@@ -85,6 +87,7 @@ export default {
                 latitude: "",
                 longitude: ""
             },
+            originalVenue: null,
 
             isValidVenueName: null,
             isValidCategory: null,
@@ -122,7 +125,7 @@ export default {
             });
         },
         getEditVenue() {
-            Api.requestVenue(this.$route.params.venueId).then((response) => {
+            Api.requestVenue(this.editVenueId).then((response) => {
                 let recievedVenue = response.data;
 
                 this.venue.venueName = recievedVenue.venueName;
@@ -133,23 +136,25 @@ export default {
                 this.venue.address = recievedVenue.address;
                 this.venue.latitude = recievedVenue.latitude;
                 this.venue.longitude = recievedVenue.longitude;
+
+                this.originalVenue = {};
+                this.originalVenue.venueName = recievedVenue.venueName;
+                this.originalVenue.categoryId = recievedVenue.category.categoryId;
+                this.originalVenue.city = recievedVenue.city;
+                this.originalVenue.shortDescription = recievedVenue.shortDescription;
+                this.originalVenue.longDescription = recievedVenue.longDescription;
+                this.originalVenue.address = recievedVenue.address;
+                this.originalVenue.latitude = recievedVenue.latitude;
+                this.originalVenue.longitude = recievedVenue.longitude;
                 
                 this.editVenuePhotos = recievedVenue.photos;
-
             }).catch((error) => {
                 // TODO: Handle error.
                 console.log(error);
             });
         },
         addVenue() {
-            this.isValidVenueName =  this.venue.venueName != "";
-            this.isValidCategory = this.venue.categoryId != null;
-            this.isValidShortDescription = this.venue.shortDescription != "";
-            this.isValidCity = this.venue.city != "";
-            this.isValidAddress = this.venue.address != "";
-            this.isValidLatitude = this.venue.latitude != "" && -90 <= Number(this.venue.latitude) && Number(this.venue.latitude) <= 90;
-            this.isValidLongitude = this.venue.longitude != "" && -180 <= Number(this.venue.longitude) && Number(this.venue.longitude) <= 180;
-            if (this.isValidVenueName && this.isValidCategory && this.isValidShortDescription && this.isValidShortDescription && this.isValidCity && this.isValidAddress && this.isValidLatitude && this.isValidLongitude) {
+            if (this.validateInput()) {
                 this.venue.latitude = Number(this.venue.latitude);
                 this.venue.longitude = Number(this.venue.longitude);
                 Api.requestCreateVenue(this.venue).then((response) => {
@@ -157,7 +162,6 @@ export default {
                     let venueId = response.data.venueId;
                     let photoNumber = 1;
                     for (let photo of this.addedPhotos) {
-                        console.log(photoNumber === this.primaryPhoto);
                         Api.requetsAddVenuePhoto(venueId, photo, photoNumber === this.primaryPhoto, "").then().catch((error) => {
                             // TODO: Handle error;
                             console.log(error);
@@ -171,6 +175,18 @@ export default {
                         this.createErrorModal("Opps. Something went wrong, try again later.");
                         console.log(error);
                     }});  
+            }
+        },
+        updateVenue() {
+            if (this.validateInput()) {
+                this.venue.latitude = Number(this.venue.latitude);
+                this.venue.longitude = Number(this.venue.longitude);
+                Api.requestEditVenue(this.editVenueId, this.venue).then((response) => {
+                    this.$router.push(`/venues/${this.editVenueId}`);
+                }).catch((error) => {
+                    // TODO: Handle error.
+                    console.log(error);
+                });
             }
         },
         addPhotos() {
@@ -189,7 +205,6 @@ export default {
             if (this.primaryPhoto-1 === index) {
                 this.primaryPhoto = 1;
             } else if (index < this.primaryPhoto-1) {
-                console.log("fasf")
                 this.primaryPhoto -= 1;
             }
         },
@@ -203,6 +218,34 @@ export default {
         },
         formatFileBoxMessage(files) {
             return `${files.length} photos selected`;
+        },
+        validateInput() {
+            this.isValidVenueName =  this.venue.venueName != "";
+            this.isValidCategory = this.venue.categoryId != null;
+            this.isValidShortDescription = this.venue.shortDescription != "";
+            this.isValidCity = this.venue.city != "";
+            this.isValidAddress = this.venue.address != "";
+            this.isValidLatitude = this.venue.latitude != "" && -90 <= Number(this.venue.latitude) && Number(this.venue.latitude) <= 90;
+            this.isValidLongitude = this.venue.longitude != "" && -180 <= Number(this.venue.longitude) && Number(this.venue.longitude) <= 180;
+            return (this.isValidVenueName && this.isValidCategory && this.isValidShortDescription && this.isValidShortDescription && this.isValidCity && this.isValidAddress && this.isValidLatitude && this.isValidLongitude);
+        },
+        hasVenueChanged() {
+            for (let key in this.originalVenue) {
+                if (this.originalVenue[key] != this.venue[key]) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        resetEditFields() {
+            this.venue.venueName = this.originalVenue.venueName;
+            this.venue.categoryId = this.originalVenue.categoryId;
+            this.venue.city = this.originalVenue.city;
+            this.venue.shortDescription = this.originalVenue.shortDescription;
+            this.venue.longDescription = this.originalVenue.longDescription;
+            this.venue.address = this.originalVenue.address;
+            this.venue.latitude = this.originalVenue.latitude;
+            this.venue.longitude = this.originalVenue.longitude;
         }
     },
     computed: {
@@ -215,6 +258,9 @@ export default {
         },
         editing: function() {
             return this.$route.name === "EditVenue";
+        },
+        editVenueId: function() {
+            return this.$route.params.venueId;
         }
     }
 }
