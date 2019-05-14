@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-container class="center" style="max-width: 50rem;">
+        <b-container class="center" style="max-width: 54rem;">
             <b-card :title="editing ? 'Edit Venue' : 'Create Venue'">
                 <b-row>
                     <b-col>
@@ -42,10 +42,9 @@
                     <b-col>
                         <b-form-group label="Photos">
                             <b-card>
-                                <b-form-group :state="isValidPhotos" invalid-feedback="No files selected.">
-                                    <b-form-file v-model="photos" multiple :file-name-formatter="formatFileBoxMessage" accept="image/jpeg, image/png" :state="isValidPhotos"></b-form-file>
+                                <b-form-group :state="isValidPhotos" :invalid-feedback="photosErrorMessage">
+                                    <b-form-file @input="photos.length > 0 ? addPhotos() : ''" v-model="photos" multiple :file-name-formatter="formatFileBoxMessage" accept="image/jpeg, image/png" :state="isValidPhotos" placeholder="Add photos"></b-form-file>
                                 </b-form-group>
-                                <b-button @click="addPhotos()" style="margin-bottom: 15px">Add Selected Photos</b-button>
                                 <b-card>
                                 <template v-for="i in totalNumberPhotos">
                                     <b-button-group style="margin-bottom: 10px" :id="`photo${i}`" size="sm" v-bind:key="i*totalNumberPhotos+primaryPhoto">
@@ -53,6 +52,7 @@
                                         <b-button @click="removePhoto(i-1)" variant="danger">Remove</b-button>
                                         <b-button @click="primaryPhoto=i" :variant="i != primaryPhoto ? 'outline-primary' : 'primary'">{{i != primaryPhoto ? 'Make Primary' :  'Primary Photo'}}</b-button>
                                     </b-button-group>
+                                    <b-badge v-if="editing && i-1 >= existingVenuePhotos.length" variant="success" v-bind:key="'badge'+i*totalNumberPhotos+primaryPhoto">New</b-badge>
                                 </template>
                                 </b-card>
                                 <b-popover v-for="i in totalNumberPhotos" v-bind:key="i*totalNumberPhotos+primaryPhoto" :target="`photo${i}`" triggers="hover" title="Preview" placement="left" no-fade>
@@ -98,6 +98,7 @@ export default {
             isValidLongitude: null,
 
             isValidPhotos: null,
+            photosErrorMessage: "",
 
             photos: [],
             addedPhotos: [],
@@ -221,15 +222,26 @@ export default {
             }
         },
         addPhotos() {
-            if (this.photos.length === 0) {
-                this.isValidPhotos = false;
-            } else {
-                for (let photo of this.photos) {
-                    this.addedPhotos.push(photo);
+            let isValid = true;
+            console.log(this.photos)
+            for (let photo of this.photos) {
+                if (photo.size > 20971520) {
+                    this.isValidPhotos = false;
+                    isValid = false;
+                    this.photosErrorMessage = "One of the selected photos was over 20 MB.";
+                } else if (photo.type != "image/jpeg" && photo.type != "image/png") {
+                    this.isValidPhotos = false;
+                    isValid = false;
+                    this.photosErrorMessage = "Photos must be either in PNG or JPEG format.";
                 }
-                this.photos = [];
-                this.isValidPhotos = null;
-            }  
+            }
+            if (isValid) {
+                for (let photo of this.photos) {
+                this.addedPhotos.push(photo);
+            }
+            this.isValidPhotos = null;
+            }
+            this.photos = [];
         },
         removePhoto(index) {
             if (index < this.existingVenuePhotos.length) {
@@ -294,6 +306,8 @@ export default {
                 this.existingVenuePhotos.push(photo);
             }
             this.primaryPhoto = this.originalPrimaryPhoto;
+            this.photos = [];
+            this.isValidPhotos = null;
         }
     },
     computed: {
