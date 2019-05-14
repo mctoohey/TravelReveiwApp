@@ -18,9 +18,9 @@
                         <b-list-group-item>Address: {{ venue.address }}</b-list-group-item>
                     </b-list-group>
                     <b-card>
-                        <b-card-sub-title>Description<span v-if="venue.longDescription != ''"><b-button v-b-toggle.descriptionCollapse style="float: right" variant="link"><v-icon :name="descriptionCollapsed ? 'chevron-down':'chevron-right'" scale="1.5"/></b-button></span></b-card-sub-title>
+                        <b-card-sub-title>Description<span v-if="venue.longDescription != ''"><b-button v-b-toggle.descriptionCollapse style="float: right" variant="link"><v-icon :name="descriptionExpanded ? 'chevron-down':'chevron-right'" scale="1.5"/></b-button></span></b-card-sub-title>
                         <b-card-text>{{ venue.shortDescription }}</b-card-text>
-                        <b-collapse id="descriptionCollapse" v-model="descriptionCollapsed">
+                        <b-collapse id="descriptionCollapse" v-model="descriptionExpanded">
                             <b-card-text>{{ venue.longDescription }}</b-card-text>
                         </b-collapse>
                     </b-card>
@@ -46,15 +46,20 @@
             <b-col>
                 <b-card>
                     <b-card-title>Reviews</b-card-title>
-                    <b-button v-b-toggle="'post-review-card'" style="margin-bottom: 10px">Post a review</b-button>
-                    <b-collapse id="post-review-card">
+                    <b-button @click="expandReviewAction()" style="margin-bottom: 10px">{{postReviewbuttonText}}</b-button>
+                    <b-collapse v-model="postReviewExpanded">
                             <b-form-textarea
-                                id="textarea"
-                                v-model="text"
-                                placeholder="Enter something..."
-                                rows="3"
-                                max-rows="6"
+                                v-model="reviewText"
+                                placeholder="Enter your review..."
+                                rows="4"
+                                style="margin-bottom: 10px"
                                 ></b-form-textarea>
+                            <b-row style="margin-bottom: 10px">
+                                <b-container fluid class="text-right">
+                                    <b-button>Post</b-button>
+                                </b-container>
+                            </b-row>
+                                
                     </b-collapse>
                     <b-card v-for="review in reviews" v-bind:key="review.reviewAuthor.userId" style="margin-bottom: 10px">
                         <b-card-sub-title>{{ review.reviewAuthor.username }}<span style="float: right">{{ review.timePosted | formatDate}} at {{ review.timePosted | formatTime }}</span></b-card-sub-title>
@@ -99,7 +104,9 @@ export default {
         return {
             venue: null,
             reviews: [],
-            descriptionCollapsed: false
+            descriptionExpanded: false,
+            postReviewExpanded: false, 
+            reviewText: ""
         };
     },
     mounted: function() {
@@ -125,6 +132,24 @@ export default {
         },
         getPhotoUrl(photoFilename) {
             return Api.getVenuePhotoUrl(this.$route.params.venueId, photoFilename);
+        },
+        expandReviewAction() {
+            if (this.$store.getters.userSignedIn) {
+                this.postReviewExpanded = !this.postReviewExpanded;
+            } else {
+                this.postReviewExpanded = false;
+            }
+        }
+    },
+    computed: {
+        postReviewbuttonText: function() {
+            if (this.$store.getters.userSignedIn && !this.postReviewExpanded) {
+                return "Post a review";
+            } else if (this.$store.getters.userSignedIn && this.postReviewExpanded) {
+                return "Cancel";
+            } else {
+                return "Sign in to leave a review";
+            }
         }
     },
     filters: {
