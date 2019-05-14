@@ -42,9 +42,20 @@
                 </b-card>
             </b-col>
         </b-row >
-        <b-row style="margin: 20px">
+        <b-row style="margin-bottom: 20px">
             <b-col>
-                <b-card title="Reviews">
+                <b-card>
+                    <b-card-title>Reviews</b-card-title>
+                    <b-button v-b-toggle="'post-review-card'" style="margin-bottom: 10px">Post a review</b-button>
+                    <b-collapse id="post-review-card">
+                            <b-form-textarea
+                                id="textarea"
+                                v-model="text"
+                                placeholder="Enter something..."
+                                rows="3"
+                                max-rows="6"
+                                ></b-form-textarea>
+                    </b-collapse>
                     <b-card v-for="review in reviews" v-bind:key="review.reviewAuthor.userId" style="margin-bottom: 10px">
                         <b-card-sub-title>{{ review.reviewAuthor.username }}<span style="float: right">{{ review.timePosted | formatDate}} at {{ review.timePosted | formatTime }}</span></b-card-sub-title>
                         <b-card-body style="padding: 15px;">
