@@ -223,7 +223,6 @@ export default {
         },
         addPhotos() {
             let isValid = true;
-            console.log(this.photos)
             for (let photo of this.photos) {
                 if (photo.size > 20971520) {
                     this.isValidPhotos = false;

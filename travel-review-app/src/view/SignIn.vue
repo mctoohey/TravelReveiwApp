@@ -37,7 +37,6 @@ export default {
                 Api.requestSignIn(this.login, this.login, this.password).then((response) => {
                     this.$cookies.set('authToken', response.data.token, '1d');
                     this.$cookies.set('userId', response.data.userId, '1d');
-                    // TODO: Don't use this hack.
                     Api.requestUser(response.data.userId).then((response2) => {
                         let user = response2.data;
                         user.id = response.data.userId
@@ -48,7 +47,7 @@ export default {
                         // TODO: Handle error.
                         console.log(error);
                         this.$router.push('/');
-                    })
+                    });
                 }).catch((error) => {
                     console.log(this.login)
                     if (error.status === 400) {
