@@ -23,7 +23,7 @@
                                 <template v-if="venue.modeCostRating != null">
                                     <cost-rating style="width: 120px;" iconScale="1.5" :costRating="Number(venue.modeCostRating)"></cost-rating>
                                 </template>
-                                <span v-else>This venue has no reviews yet.</span>
+                                <!-- <span v-else>This venue has no reviews yet.</span> -->
                             </b-badge>
                         </b-card>
                     </b-container>
@@ -189,13 +189,11 @@ export default {
             }
             query.sortBy = this.selectedSortBy[0];
             query.reverseSort = this.selectedSortBy[1];
+            query.maxCostRating = this.maxCostRating;
             if (this.minStarRating >= 1) {
                 query.minStarRating = this.minStarRating;
             }
-            // TODO: Remove this.
-            if (this.maxCostRating < 4) {
-                query.maxCostRating = this.maxCostRating;
-            }
+            
             if (this.isAdminPage) {
                 query.adminId = parseInt(this.$store.state.signedInUser.id);
             }
