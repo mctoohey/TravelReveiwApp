@@ -48,12 +48,26 @@
                     <b-card-title>Reviews</b-card-title>
                     <b-button @click="expandReviewAction()" style="margin-bottom: 10px">{{postReviewbuttonText}}</b-button>
                     <b-collapse v-model="postReviewExpanded">
-                            <b-form-textarea
-                                v-model="reviewText"
-                                placeholder="Enter your review..."
-                                rows="4"
-                                style="margin-bottom: 10px"
-                                ></b-form-textarea>
+                        <b-row>
+                            <b-col>
+                                <b-form-textarea
+                                    v-model="reviewText"
+                                    placeholder="Enter your review..."
+                                    rows="4"
+                                    style="margin-bottom: 10px"
+                                    ></b-form-textarea>
+                            </b-col>
+                            <b-col>
+                                <b-form-group label="Minimum star rating" style="max-width: 250px">
+                                    <b-form-input v-model="minStarRating" type="range" min="0" max="5"></b-form-input>
+                                    <star-rating iconScale="2" :stars="Number(minStarRating)"></star-rating>
+                                </b-form-group>
+                                <b-form-group label="Maximum cost rating" style="max-width: 250px">
+                                    <b-form-input v-model="maxCostRating" type="range" min="0" max="4"></b-form-input>
+                                    <cost-rating iconScale="2" :costRating="Number(maxCostRating)"></cost-rating>
+                                </b-form-group>
+                            </b-col>
+                            </b-row>
                             <b-row style="margin-bottom: 10px">
                                 <b-container fluid class="text-right">
                                     <b-button>Post</b-button>
