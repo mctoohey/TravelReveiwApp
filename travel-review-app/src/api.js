@@ -59,6 +59,10 @@ export const Api = {
         return Vue.http.post(baseURL+`/venues/${venueId}/photos/${photoName}/setPrimary`); 
     },
 
+    requestPostVenueReview(venueId, review) {
+        return Vue.http.post(baseURL+`/venues/${venueId}/reviews`, review); 
+    },
+
     requestCategories() {
         return Vue.http.get(baseURL+'/categories');
     },

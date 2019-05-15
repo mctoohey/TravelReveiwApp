@@ -47,30 +47,30 @@
                 <b-card>
                     <b-card-title>Reviews</b-card-title>
                     <b-button @click="expandReviewAction()" style="margin-bottom: 10px">{{postReviewbuttonText}}</b-button>
-                    <b-collapse v-model="postReviewExpanded">
-                        <b-card  style="margin-bottom: 10px">
+                    <b-collapse v-model="postReviewExpanded" id="postReviewCollapse">
+                        <b-card  style="margin-bottom: 10px;">
                         <b-row>
                             <b-col>
                                 <b-form-textarea
-                                    v-model="reviewText"
+                                    v-model="userReview.reviewBody"
                                     placeholder="Enter your review..."
                                     rows="8"
                                     ></b-form-textarea>
                             </b-col>
                             <b-col style="max-width: 300px">
                                 <b-form-group label="Minimum star rating" style="max-width: 250px">
-                                    <b-form-input v-model="reviewStarRating" type="range" min="0" max="5"></b-form-input>
-                                    <star-rating iconScale="2" :stars="Number(reviewStarRating)"></star-rating>
+                                    <b-form-input v-model="userReview.starRating" type="range" min="0" max="5"></b-form-input>
+                                    <star-rating iconScale="2" :stars="Number(userReview.starRating)"></star-rating>
                                 </b-form-group>
                                 <b-form-group label="Maximum cost rating" style="max-width: 250px">
-                                    <b-form-input v-model="reviewCostRating" type="range" min="0" max="4"></b-form-input>
-                                    <cost-rating iconScale="2" :costRating="Number(reviewCostRating)"></cost-rating>
+                                    <b-form-input v-model="userReview.costRating" type="range" min="0" max="4"></b-form-input>
+                                    <cost-rating iconScale="2" :costRating="Number(userReview.costRating)"></cost-rating>
                                 </b-form-group>
                             </b-col>
                             </b-row>
-                            <b-row style="margin-bottom: 10px">
+                            <b-row style="margin-bottom: 0px">
                                 <b-container fluid class="text-right">
-                                    <b-button>Post</b-button>
+                                    <b-button @click="postReview()" style="min-width: 100px">Post</b-button>
                                 </b-container>
                             </b-row>
                         </b-card>
@@ -120,10 +120,13 @@ export default {
             reviews: [],
             descriptionExpanded: false,
             postReviewExpanded: false, 
-            reviewText: "",
 
-            reviewStarRating: 2,
-            reviewCostRating: 2
+            userReview: {
+                reviewBody: "",
+
+                starRating: 2,
+                costRating: 2
+            }
         };
     },
     mounted: function() {
@@ -142,6 +145,13 @@ export default {
         getReviews(venueId) {
             Api.requestVenueReviews(venueId).then((response) => {
                 this.reviews = response.data;
+                if (this.$store.getters.userSignedIn) {
+                    for (let review of this.reviews) {
+                        if (review.reviewAuthor.userId === this.$store.state.signedInUser) {
+                            this.userReview = review;
+                        }
+                    }
+                }
             }).catch((error) => {
                 // TODO: Handle error.
                 console.log(error);
@@ -156,6 +166,9 @@ export default {
             } else {
                 this.postReviewExpanded = false;
             }
+        },
+        postReview() {
+            Api.requestPostVenueReview(this.$route.params.venueId, this.userReview);
         }
     },
     computed: {
