@@ -19,6 +19,7 @@
                             <b-dropdown-item :to="`/users/${this.$store.state.signedInUser.id}`">View Profile</b-dropdown-item>
                             <b-dropdown-item @click="signOut()">Sign Out</b-dropdown-item>
                         </b-dropdown>
+                        <b-img rounded fluid :src="profileImage" alt="Image 1" height="40" width="40" style="padding: 0px; border: 2px solid gray;"></b-img>
                     </div>
                     <div v-else-if="shouldDisplaySignIn()">
                         <b-button to="/signin">Sign In</b-button>
@@ -34,6 +35,7 @@ import Api from '../api.js';
 export default {
     data: function() {
         return {
+            profileImage: require('../assets/DefaultProfileImage.png')
         };
     },
     methods: {
@@ -55,6 +57,19 @@ export default {
             this.$cookies.remove('authToken');
             this.$cookies.remove('userId');
             this.$router.push('/');
+        },
+        getPhoto() {
+            if (this.userSignedIn) {
+                Api.requestUserPhoto(this.$store.state.signedInUser.id).then((response) => {
+                    this.profileImage = Api.getUserPhotoUrl(this.$store.state.signedInUser.id);                
+                }).catch((error) => {
+                    if (error.status === 404) {
+                        this.profileImage = require('../assets/DefaultProfileImage.png');
+                    } else {
+                        //TODO: Handle error.
+                        console.log(error);
+                }});
+            } 
         }
     },
     computed: {
@@ -68,6 +83,9 @@ export default {
                 return "Profile";
             }
         }
+    },
+    mounted() {
+        this.getPhoto();
     }
 }
 </script>

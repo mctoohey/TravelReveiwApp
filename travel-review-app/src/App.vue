@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <nav-bar></nav-bar>
-    <router-view></router-view>
+    <nav-bar :key="this.$store.getters.userKey"></nav-bar>
+    <router-view :key="$route.path"></router-view>
   </div>
 </template>
 

@@ -32,10 +32,10 @@
                     </div>
                 </b-row>
             </b-container>
-            <b-form-group label="Profile photo">
+            <b-form-group label="Profile photo" :state="isValidPhoto" :invalid-feedback="photoErrorMessage">
                 <b-row>
                     <b-col style="padding-right: 0px">
-                        <b-form-file @input="photoDeleted = false; getPhotoSrc()" v-model="photo" placeholder="Add photo here" :file-name-formatter="(files) => {return 'Photo Selected'}"></b-form-file>
+                        <b-form-file @input="photoDeleted = false; validatePhoto(); getPhotoSrc();" v-model="photo" placeholder="Add photo here" :file-name-formatter="(files) => {return this.photo != null ? 'Photo Selected' : 'Add photo here'}" :state="isValidPhoto"></b-form-file>
                     </b-col>
                     <b-col cols="5" style="padding-left: 0px">
                         <b-button @click="photoDeleted = true; getPhotoSrc()" style="float: right">Delete Photo</b-button>
@@ -104,7 +104,9 @@ export default {
 
             photo: null,
             photoSrc: require('../assets/DefaultProfileImage.png'),
-            photoDeleted: false
+            photoDeleted: false,
+            photoErrorMessage: "",
+            isValidPhoto: null
         };
     },
     mounted() {
@@ -141,6 +143,7 @@ export default {
                     if (this.photoDeleted) {
                         Api.requestDeleteUserPhoto(this.$route.params.userId).then((response) => {
                             this.$router.push(`/users/${this.$route.params.userId}`);
+                            this.$store.commit('userEdited');
                         }).catch((error) => {
                             this.$router.push(`/users/${this.$route.params.userId}`);
                             // TODO: Handle error.
@@ -150,6 +153,7 @@ export default {
                         this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
                         Api.requestSetUserPhoto(this.$route.params.userId, blob).then((response) => {
                             this.$router.push(`/users/${this.$route.params.userId}`);
+                            this.$store.commit('userEdited');
                         }).catch((error) => {
                             this.$router.push(`/users/${this.$route.params.userId}`);
                             // TODO: Handle error.
@@ -208,6 +212,23 @@ export default {
                 }});
             } else {
                 this.photoSrc = window.URL.createObjectURL(this.photo);
+            }
+        },
+        validatePhoto() {
+            let isValid = true;
+            if (this.photo.size > 20971520) {
+                this.isValidPhoto = false;
+                isValid = false;
+                this.photoErrorMessage = "Selected photo was over 20 MB.";
+                this.photo = null;
+            } else if (this.photo.type != "image/jpeg" && this.photo.type != "image/png") {
+                this.isValidPhoto = false;
+                isValid = false;
+                this.photoErrorMessage = "Photo must be either in PNG or JPEG format.";
+                this.photo = null;
+            }
+            if (isValid) {
+                this.isValidPhoto = null;
             }
         }
     },

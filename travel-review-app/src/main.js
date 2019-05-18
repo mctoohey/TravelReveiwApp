@@ -30,32 +30,10 @@ VueCookies.set('hover-time', '1s');
 const store = createStore();
 const router = createRouter();
 
-// Add the auth token if the user has one.
-Vue.http.interceptors.push(function(request, next) {
-    if (store.getters.userSignedIn) {
-        request.headers.set('X-Authorization', store.state.authToken);
-    }
-    next();
-});
-
-// Check if the user is signed in if the page has been reloaded.
-if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
-    // TODO: Move this some where an reuse code from sign in.
-    store.commit('setAuth', $cookies.get('authToken'));
-    Api.requestUser($cookies.get('userId')).then((response) => {
-                let user = response.data;
-                user.id = $cookies.get('userId');
-                store.commit('setSignedInUser', user);
-            }).catch((error) => {
-                // TODO: Handle error.
-                console.log(error);
-            });
-}
-
 // Redirect requests to pages that require the user to be logged in.
 router.beforeEach((to, from, next) => {   
     if (to.meta.requiresAuth && !store.getters.userSignedIn) {
-      next('/signin');
+      //next('/sign');
     } else {
       next();
     }
@@ -80,9 +58,44 @@ Vue.mixin({
     }
 });
 
-new Vue({
+const app = new Vue({
   el: '#app',
   store,
   router: router,
   render: h => h(App)
-})
+});
+
+// Add the auth token if the user has one.
+Vue.http.interceptors.push(function(request, next) {
+    if (store.getters.userSignedIn) {
+        request.headers.set('X-Authorization', store.state.authToken);
+    }
+    next((response) => {
+        if (response.status === 401) {
+            app.createErrorModal("Authentication Error!", response.statusText);
+        } else if (response.status === 403) {
+            app.createErrorModal("Forbidden!", response.statusText);
+        }
+    });
+});
+
+// Check if the user is signed in if the page has been reloaded.
+if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
+    // TODO: Move this some where an reuse code from sign in.
+    store.commit('setAuth', $cookies.get('authToken'));
+    Api.requestUser($cookies.get('userId')).then((response) => {
+                let user = response.data;
+                if (user.hasOwnProperty("email")) {
+                    user.id = $cookies.get('userId');
+                    store.commit('setSignedInUser', user);
+                } else {
+                    store.commit('signUserOut');
+                    $cookies.remove('authToken');
+                    $cookies.remove('userId');
+                    router.push('/');
+                }
+            }).catch((error) => {
+                // TODO: Handle error.
+                console.log(error);
+            });
+}

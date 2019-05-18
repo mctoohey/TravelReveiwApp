@@ -25,7 +25,7 @@
                         </b-collapse>
                     </b-card>
                 <b-card style="margin-top: 20px;">
-                    <b-card-text>Added by '{{ venue.admin.username }}' on {{ venue.dateAdded | formatDate }}</b-card-text>
+                    <b-card-text>Added by <a :href="`/users/${venue.admin.userId}`">{{ venue.admin.username }}</a> on {{ venue.dateAdded | formatDate }}</b-card-text>
                 </b-card>
                 </b-card>
             </b-col>
@@ -104,7 +104,7 @@
                         </b-card>
                     </b-collapse>
                     <b-card v-for="review in reviews" v-bind:key="review.reviewAuthor.userId" style="margin-bottom: 10px">
-                        <b-card-sub-title>{{ review.reviewAuthor.username }}<span style="float: right">{{ review.timePosted | formatDate}} at {{ review.timePosted | formatTime }}</span></b-card-sub-title>
+                        <b-card-sub-title><a :href="`/users/${review.reviewAuthor.userId}`">{{ review.reviewAuthor.username }}</a><span style="float: right">{{ review.timePosted | formatDate}} at {{ review.timePosted | formatTime }}</span></b-card-sub-title>
                         <b-card-body style="padding: 15px;">
                             <b-row>
                                 <b-col style="padding: 0px;">
@@ -235,7 +235,7 @@ export default {
             }
         },
         adminView: function() {
-            return this.$store.getters.userSignedIn && parseInt(this.$store.state.signedInUser.id) === parseInt(this.venue.admin.userId);
+            return this.$store.state.signedInUser != null && parseInt(this.$store.state.signedInUser.id) === parseInt(this.venue.admin.userId);
         }
     },
     filters: {
