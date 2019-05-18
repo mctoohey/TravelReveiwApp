@@ -16,7 +16,7 @@
                             <b-dropdown-item to="/create-venue">Add Venue</b-dropdown-item>
                             <b-dropdown-item to="/admin/venues">My Venues</b-dropdown-item>
                             <b-dropdown-divider></b-dropdown-divider>
-                            <b-dropdown-item>View Profile</b-dropdown-item>
+                            <b-dropdown-item :to="`/users/${this.$store.state.signedInUser.id}`">View Profile</b-dropdown-item>
                             <b-dropdown-item @click="signOut()">Sign Out</b-dropdown-item>
                         </b-dropdown>
                     </div>

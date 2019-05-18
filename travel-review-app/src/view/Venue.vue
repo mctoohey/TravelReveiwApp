@@ -46,33 +46,61 @@
             <b-col>
                 <b-card>
                     <b-card-title>Reviews</b-card-title>
-                    <b-button @click="expandReviewAction()" style="margin-bottom: 10px">{{postReviewbuttonText}}</b-button>
+                    <b-button @click="expandReviewAction()" style="margin-bottom: 10px" :disabled="adminView">{{postReviewbuttonText}}</b-button>
                     <b-collapse v-model="postReviewExpanded" id="postReviewCollapse">
-                        <b-card  style="margin-bottom: 10px;">
-                        <b-row>
-                            <b-col>
-                                <b-form-textarea
-                                    v-model="userReview.reviewBody"
-                                    placeholder="Enter your review..."
-                                    rows="8"
-                                    ></b-form-textarea>
-                            </b-col>
-                            <b-col style="max-width: 300px">
-                                <b-form-group label="Minimum star rating" style="max-width: 250px">
-                                    <b-form-input v-model="userReview.starRating" type="range" min="0" max="5"></b-form-input>
-                                    <star-rating iconScale="2" :stars="Number(userReview.starRating)"></star-rating>
-                                </b-form-group>
-                                <b-form-group label="Maximum cost rating" style="max-width: 250px">
-                                    <b-form-input v-model="userReview.costRating" type="range" min="0" max="4"></b-form-input>
-                                    <cost-rating iconScale="2" :costRating="Number(userReview.costRating)"></cost-rating>
-                                </b-form-group>
-                            </b-col>
-                            </b-row>
-                            <b-row style="margin-bottom: 0px">
-                                <b-container fluid class="text-right">
-                                    <b-button @click="postReview()" style="min-width: 100px">Post</b-button>
-                                </b-container>
-                            </b-row>
+                        <b-card style="margin-bottom: 10px;">
+                            <template v-if="!userHasReview">
+                                <b-row>
+                                <b-col>
+                                    <b-form-group invalid-feedback="Your review can not be empty." :state=isValidReviewBody>
+                                        <b-form-textarea
+                                            v-model="userReview.reviewBody"
+                                            placeholder="Enter your review..."
+                                            rows="8"
+                                            :state=isValidReviewBody
+                                            ></b-form-textarea>
+                                    </b-form-group>
+                                </b-col>
+                                <b-col style="max-width: 300px">
+                                    <b-form-group label="Minimum star rating" style="max-width: 250px">
+                                        <b-form-input v-model="userReview.starRating" type="range" min="1" max="5"></b-form-input>
+                                        <star-rating iconScale="2" :stars="Number(userReview.starRating)"></star-rating>
+                                    </b-form-group>
+                                    <b-form-group label="Maximum cost rating" style="max-width: 250px">
+                                        <b-form-input v-model="userReview.costRating" type="range" min="0" max="4"></b-form-input>
+                                        <cost-rating iconScale="2" :costRating="Number(userReview.costRating)"></cost-rating>
+                                    </b-form-group>
+                                </b-col>
+                                </b-row>
+                                <b-row style="margin-bottom: 0px">
+                                    <b-container fluid class="text-right">
+                                        <b-button @click="postReview()" style="min-width: 100px">Post</b-button>
+                                    </b-container>
+                                </b-row>
+                            </template>
+                            <template v-else>
+                                <b-card-sub-title>{{ userReview.reviewAuthor.username }}<span style="float: right">{{ userReview.timePosted | formatDate}} at {{ userReview.timePosted | formatTime }}</span></b-card-sub-title>
+                                <b-card-body style="padding: 15px;">
+                                    <b-row>
+                                        <b-col style="padding: 0px;">
+                                            <b-card-text>{{ userReview.reviewBody }}</b-card-text>
+                                        </b-col>
+                                        <b-col style="padding: 0px;">
+                                            <div style="float: right">
+                                                <b-badge pill variant="dark" style="margin: 0;">
+                                                    <star-rating style="width: 120px; padding: 2px;" iconScale="1.5" :stars="Number(userReview.starRating)"></star-rating>
+                                                </b-badge>
+                                            </div>
+                                            <br><br>
+                                            <div style="float: right">
+                                                <b-badge pill variant="dark" style="margin-right: 0px;">
+                                                    <cost-rating style="width: 120px;" iconScale="1.5" :costRating="Number(userReview.costRating)"></cost-rating>
+                                                </b-badge>
+                                            </div>
+                                        </b-col>
+                                    </b-row>
+                                </b-card-body>
+                            </template>
                         </b-card>
                     </b-collapse>
                     <b-card v-for="review in reviews" v-bind:key="review.reviewAuthor.userId" style="margin-bottom: 10px">
@@ -99,7 +127,7 @@
                         </b-card-body>
                     </b-card>
                     <div v-if="reviews.length === 0" class="text-center">
-                        <h2><b-badge variant="light" align="center">This venue has no reviews yet</b-badge></h2>
+                        <h2><b-badge variant="light" align="center">This venue has no reviews from other users yet</b-badge></h2>
                     </div>
                 </b-card>
             </b-col>
@@ -126,7 +154,9 @@ export default {
 
                 starRating: 2,
                 costRating: 2
-            }
+            },
+            userHasReview: false,
+            isValidReviewBody: null
         };
     },
     mounted: function() {
@@ -146,10 +176,18 @@ export default {
             Api.requestVenueReviews(venueId).then((response) => {
                 this.reviews = response.data;
                 if (this.$store.getters.userSignedIn) {
+                    let i = 0;
+                    let userReviewIndex = -1;
                     for (let review of this.reviews) {
-                        if (review.reviewAuthor.userId === this.$store.state.signedInUser) {
+                        if (parseInt(review.reviewAuthor.userId) === parseInt(this.$store.state.signedInUser.id)) {
                             this.userReview = review;
+                            this.userHasReview = true;
+                            userReviewIndex = i;
                         }
+                        i += 1;
+                    }
+                    if (userReviewIndex > -1) {
+                        this.reviews.splice(userReviewIndex, 1);
                     }
                 }
             }).catch((error) => {
@@ -161,25 +199,43 @@ export default {
             return Api.getVenuePhotoUrl(this.$route.params.venueId, photoFilename);
         },
         expandReviewAction() {
+            if (!this.postReviewExpanded) {
+                this.isValidReviewBody = null;
+            }
+
             if (this.$store.getters.userSignedIn) {
                 this.postReviewExpanded = !this.postReviewExpanded;
             } else {
                 this.postReviewExpanded = false;
+                this.$router.push('/signin');
             }
         },
         postReview() {
-            Api.requestPostVenueReview(this.$route.params.venueId, this.userReview);
+            this.userReview.costRating = parseInt(this.userReview.costRating);
+            this.userReview.starRating = parseInt(this.userReview.starRating);
+            if (this.userReview.reviewBody.length > 0) {
+                Api.requestPostVenueReview(this.$route.params.venueId, this.userReview);
+            } else {
+                this.isValidReviewBody = false;
+            }
         }
     },
     computed: {
         postReviewbuttonText: function() {
-            if (this.$store.getters.userSignedIn && !this.postReviewExpanded) {
+            if (this.userHasReview && !this.postReviewExpanded) {
+                return "View my review";
+            } else if (this.userHasReview && this.postReviewExpanded) {
+                return "Close";
+            } else if (this.$store.getters.userSignedIn && !this.postReviewExpanded) {
                 return "Post a review";
             } else if (this.$store.getters.userSignedIn && this.postReviewExpanded) {
                 return "Cancel";
             } else {
                 return "Sign in to leave a review";
             }
+        },
+        adminView: function() {
+            return this.$store.getters.userSignedIn && parseInt(this.$store.state.signedInUser.id) === parseInt(this.venue.admin.userId);
         }
     },
     filters: {

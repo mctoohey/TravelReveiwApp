@@ -6,7 +6,8 @@ import CreateVenue from './view/CreateVenue.vue';
 import Home from './view/Home.vue';
 import SignUp from './view/SignUp';
 import SignIn from './view/SignIn';
-import User from './view/User.vue'
+import User from './view/User.vue';
+import EditUser from './view/EditUser.vue';
 
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
@@ -49,6 +50,13 @@ const routes = [
     {
       path: "/users/:userId",
       component: User
+    },
+    {
+        path: "/users/:userId/edit",
+        component: EditUser,
+        meta: {
+            requiresAuth: true
+        }
     },
     {
       path: "/signin",

@@ -4,16 +4,11 @@
             <b-card class="text-center">
                 <b-img thumbnail fluid src="https://picsum.photos/250/250/?image=54" alt="Image 1"></b-img>
                 <b-card-title style="margin-top: 20px">{{user.givenName}} {{user.familyName}}</b-card-title>
-                <b-card class="text-left">
+                <b-card class="text-left" style="margin-bottom: 20px">
                     <p><b>Username:</b> {{user.username}}</p>
                     <p v-if="user.email != null"><b>Email:</b> {{user.email}}</p>
                 </b-card>
-                
-            <!-- <b-form-group disabled label="Email or Username">
-                <b-card></b-card>
-                <b-badge>asf</b-badge>
-                <b-form-input v-model="login" placeholder="Email or Username"></b-form-input>
-            </b-form-group> -->
+                <b-button v-if="user.email != null" :to="`/users/${this.$route.params.userId}/edit`" style="float: right">Edit Profile</b-button>
             </b-card>
         </b-container>
     </div>

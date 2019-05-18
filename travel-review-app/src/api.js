@@ -23,6 +23,10 @@ export const Api = {
         return Vue.http.post(baseURL+'/users', user);
     },
 
+    requestEditUser(userId, editValues) {
+        return Vue.http.patch(baseURL+`/users/${userId}`, editValues);
+    },
+
     requestVenues(requestParams) {
         return Vue.http.get(baseURL+'/venues', {params: requestParams});
     },
