@@ -234,7 +234,7 @@ export default {
             if (venue.primaryPhoto != null) {
                 return Api.getVenuePhotoUrl(venue.venueId, venue.primaryPhoto);
             } else {
-                return require('../assets/DefaultImage.png')
+                return require('../assets/DefaultImage.png');
             }
         },
         displayError: function(message) {

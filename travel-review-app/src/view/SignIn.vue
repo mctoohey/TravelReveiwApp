@@ -49,7 +49,6 @@ export default {
                         this.$router.push('/');
                     });
                 }).catch((error) => {
-                    console.log(this.login)
                     if (error.status === 400) {
                         this.displayError("Invalid email/username or password.");
                     } else {

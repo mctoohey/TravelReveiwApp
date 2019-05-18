@@ -27,6 +27,22 @@ export const Api = {
         return Vue.http.patch(baseURL+`/users/${userId}`, editValues);
     },
 
+    requestUserPhoto(userId) {
+        return Vue.http.get(baseURL+`/users/${userId}/photo`);
+    },
+
+    requestDeleteUserPhoto(userId) {
+        return Vue.http.delete(baseURL+`/users/${userId}/photo`);
+    },
+
+    requestSetUserPhoto(userId, photo) {
+        return Vue.http.put(baseURL+`/users/${userId}/photo`, photo, {
+            headers: {
+                "Content-Type": photo.type
+            }
+        });
+    },
+
     requestVenues(requestParams) {
         return Vue.http.get(baseURL+'/venues', {params: requestParams});
     },
@@ -73,6 +89,10 @@ export const Api = {
 
     getVenuePhotoUrl(venueId, photoId) {
         return baseURL+`/venues/${venueId}/photos/${photoId}`;
+    },
+
+    getUserPhotoUrl(userId) {
+        return baseURL+`/users/${userId}/photo`;
     }
 }
 

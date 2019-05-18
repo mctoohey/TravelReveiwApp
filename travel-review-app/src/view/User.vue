@@ -2,7 +2,7 @@
     <div>
         <b-container class="center" style="max-width: 30rem;">
             <b-card class="text-center">
-                <b-img thumbnail fluid src="https://picsum.photos/250/250/?image=54" alt="Image 1"></b-img>
+                <b-img fluid :src="image" alt="No Photo Found" width="300" height="300" style="padding: 0px; border: 4px solid gray; border-radius: 25px;"></b-img>
                 <b-card-title style="margin-top: 20px">{{user.givenName}} {{user.familyName}}</b-card-title>
                 <b-card class="text-left" style="margin-bottom: 20px">
                     <p><b>Username:</b> {{user.username}}</p>
@@ -22,8 +22,10 @@ export default {
                 givenName: "",
                 familyName: "",
                 username: "",
-                email: null
-            }
+                email: null,
+            },
+
+            image: require('../assets/DefaultProfileImage.png')
         };
     },
     methods: {
@@ -34,10 +36,22 @@ export default {
                         // TODO: Handle error.
                         console.log(error);
                     });
+        },
+        getPhoto() {
+            Api.requestUserPhoto(this.$route.params.userId).then((response) => {
+                this.image = Api.getUserPhotoUrl(this.$route.params.userId);                
+            }).catch((error) => {
+                if (error.status === 404) {
+                    this.image = require('../assets/DefaultProfileImage.png');
+                } else {
+                    //TODO: Handle error.
+                    console.log(error);
+            }});
         }
     },
     mounted: function() {
         this.getUser();
+        this.getPhoto();
     }
 }
 </script>
