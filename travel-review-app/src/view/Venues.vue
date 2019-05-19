@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-container fluid style="height: 100% background-color: blue">
+        <b-container fluid style="height: 100%">
         <b-row>
         <b-col :style="{'padding-right': '0', 'padding-left': '0'}">
         <scrolly :style="{'height': 'calc(100vh - 60px)'}">

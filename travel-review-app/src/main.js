@@ -33,7 +33,7 @@ const router = createRouter();
 // Redirect requests to pages that require the user to be logged in.
 router.beforeEach((to, from, next) => {   
     if (to.meta.requiresAuth && !store.getters.userSignedIn) {
-      //next('/sign');
+      next('/sign');
     } else {
       next();
     }
@@ -58,13 +58,6 @@ Vue.mixin({
     }
 });
 
-const app = new Vue({
-  el: '#app',
-  store,
-  router: router,
-  render: h => h(App)
-});
-
 // Add the auth token if the user has one.
 Vue.http.interceptors.push(function(request, next) {
     if (store.getters.userSignedIn) {
@@ -72,9 +65,9 @@ Vue.http.interceptors.push(function(request, next) {
     }
     next((response) => {
         if (response.status === 401) {
-            app.createErrorModal("Authentication Error!", response.statusText);
+            createErrorModal("Authentication Error!", response.statusText);
         } else if (response.status === 403) {
-            app.createErrorModal("Forbidden!", response.statusText);
+            createErrorModal("Forbidden!", response.statusText);
         }
     });
 });
@@ -83,6 +76,7 @@ Vue.http.interceptors.push(function(request, next) {
 if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
     // TODO: Move this some where an reuse code from sign in.
     store.commit('setAuth', $cookies.get('authToken'));
+    store.commit('setSignedInUser', {id: $cookies.get('userId')});
     Api.requestUser($cookies.get('userId')).then((response) => {
                 let user = response.data;
                 if (user.hasOwnProperty("email")) {
@@ -99,3 +93,15 @@ if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
                 console.log(error);
             });
 }
+
+const app = new Vue({
+  el: '#app',
+  store,
+  router: router,
+  render: h => h(App)
+});
+
+// So we can create an error modal from here.
+let createErrorModal = app.createErrorModal;
+
+

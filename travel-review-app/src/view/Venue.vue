@@ -1,17 +1,18 @@
 <template>
-    <div v-if="venue !== null">
-        <b-row style="margin-top: 30px">
-            <b-col style="padding-left: 50px">
+    <b-container v-if="venue !== null" fluid style="padding: 20px;">
+        <b-row style="margin-top: 0px;">
+            <b-col style="padding-top: 0px; padding-left: 10px; padding-right: 10px; min-width: 350px">
                 <b-card :title="venue.venueName" style="height: 100%">
                     <b-card-sub-title>
                         <b-badge id="categoryBadge">
                             <b-popover
-                        target="categoryBadge"
-                        placement="top"
-                        :title="venue.category.categoryName"
-                        triggers="hover focus"
-                        :content="venue.category.categoryDescription"
+                                target="categoryBadge"
+                                placement="top"
+                                :title="venue.category.categoryName"
+                                triggers="hover focus"
+                                :content="venue.category.categoryDescription"
                             ></b-popover><h6>{{ venue.category.categoryName }}</h6></b-badge>
+                        <b-button v-if="adminView" :to="`/venues/${$route.params.venueId}/edit`" size="lg" variant="outline-success" style="margin-left: 15px; padding-top: 0px; padding-bottom: 0px; float: right">Edit</b-button>
                     </b-card-sub-title>
                         <b-card style="margin-top: 15px; margin-bottom: 15px">
                             <b-card-sub-title>Description<span v-if="venue.longDescription !== ''"><b-button v-b-toggle.descriptionCollapse style="float: right" variant="link"><v-icon :name="descriptionExpanded ? 'chevron-down':'chevron-right'" scale="1.5"/></b-button></span></b-card-sub-title>
@@ -21,11 +22,12 @@
                             </b-collapse>
                         </b-card>
                         <div>
-                            <b-badge pill variant="dark" style="margin: 0;">
+                            <b-badge v-if="meanStarRating != null" pill variant="dark" style="margin: 0;">
                                 <star-rating style="width: 120px; padding: 2px;" iconScale="1.5" :stars="Number(meanStarRating)"></star-rating>
                             </b-badge>
                             <b-badge pill variant="dark" style="margin-right: 0px;">
-                                <cost-rating style="width: 120px;" iconScale="1.5" :costRating="Number(modeCostRating)"></cost-rating>
+                                <cost-rating v-if="modeCostRating != null" style="width: 120px;" iconScale="1.5" :costRating="Number(modeCostRating)"></cost-rating>
+                                <span v-else>This venue has no ratings yet</span>
                             </b-badge>
                         </div>
                         <b-list-group style="margin-top: 20px; margin-bottom: 20px;">
@@ -38,21 +40,21 @@
                 </b-card>
                 </b-card>
             </b-col>
-            <b-col style="padding-right: 50px">
+            <b-col style="padding-top: 0px; padding-left: 10px; padding-right: 10px;">
                 <b-card title="Photos" style="height: 100%;">
-                    <b-carousel :interval="5000" controls indicators background="#ababab" style="text-shadow: 1px 1px 2px #333">
-                
-                        <b-carousel-slide v-for="photo in venue.photos" v-bind:key="photo.photoFilename"
-                            :img-src="getPhotoUrl(photo.photoFilename)"
-                            :caption="photo.photoDescription"
-                        ></b-carousel-slide>
-                        
+                    <div style="">
+                    <b-carousel v-if="venue.photos.length > 0" :interval="4000" controls indicators style="text-shadow: 1px 1px 2px #333;" class="text-center">
+                        <b-carousel-slide v-for="photo in venue.photos" v-bind:key="photo.photoFilename" style="border: 4px solid gray; border-radius: 25px;" background="black">
+                            <img :src="getPhotoUrl(photo.photoFilename)" style="object-fit: contain;" slot="img" height="480" width="800">
+                        </b-carousel-slide>
                     </b-carousel>
+                    <h2 v-else class="text-center"><b-badge variant="light" align="center" style="margin-top: auto; margin-bottom: auto;">This venue has no photos yet</b-badge></h2>
+                    </div>
                 </b-card>
             </b-col>
-        </b-row >
-        <b-row style="margin-bottom: 20px">
-            <b-col>
+        </b-row>
+        <b-row style="margin-top: 20px;">
+            <b-col style="padding-top: 0px; padding-left: 10px; padding-right: 10px;">
                 <b-card>
                     <b-card-title>Reviews</b-card-title>
                     <b-button @click="expandReviewAction()" style="margin-bottom: 10px" :disabled="adminView">{{postReviewbuttonText}}</b-button>
@@ -141,7 +143,7 @@
                 </b-card>
             </b-col>
         </b-row>
-    </div>
+    </b-container>
 </template>
 
 <script>
@@ -214,7 +216,6 @@ export default {
                     if (userReviewIndex > -1) {
                         this.reviews.splice(userReviewIndex, 1);
                     }
-                    console.log(costRatingFrequencies)
                     this.meanStarRating = starSum / numReviews;
                     this.modeCostRating = costRatingMode;
                 } else {
@@ -285,4 +286,3 @@ export default {
     }
 }
 </script>
-
