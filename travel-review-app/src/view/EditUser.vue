@@ -35,7 +35,7 @@
             <b-form-group label="Profile photo" :state="isValidPhoto" :invalid-feedback="photoErrorMessage">
                 <b-row>
                     <b-col style="padding-right: 0px">
-                        <b-form-file @input="photoDeleted = false; validatePhoto(); getPhotoSrc();" v-model="photo" placeholder="Add photo here" :file-name-formatter="(files) => {return this.photo != null ? 'Photo Selected' : 'Add photo here'}" :state="isValidPhoto"></b-form-file>
+                        <b-form-file @input="photoDeleted = false; validatePhoto(); getPhotoSrc();" v-model="photo" placeholder="Add photo here" :file-name-formatter="(files) => {return this.photo !== null ? 'Photo Selected' : 'Add photo here'}" :state="isValidPhoto"></b-form-file>
                     </b-col>
                     <b-col cols="5" style="padding-left: 0px">
                         <b-button @click="photoDeleted = true; getPhotoSrc()" style="float: right">Delete Photo</b-button>
@@ -115,11 +115,11 @@ export default {
     },
     methods: {
         updateProfile: function() {
-            this.isValidFirstName = this.firstName != "";
-            this.isValidLastName = this.lastName != "";
+            this.isValidFirstName = this.firstName !== "";
+            this.isValidLastName = this.lastName !== "";
 
             if (this.changePasswordBoxExpanded) {
-                this.isValidPassword = this.password != "";
+                this.isValidPassword = this.password !== "";
                 this.isValidPasswordReentry = this.password === this.passwordReentry;
 
                 if (!this.isValidPassword) {
@@ -221,7 +221,7 @@ export default {
                 isValid = false;
                 this.photoErrorMessage = "Selected photo was over 20 MB.";
                 this.photo = null;
-            } else if (this.photo.type != "image/jpeg" && this.photo.type != "image/png") {
+            } else if (this.photo.type !== "image/jpeg" && this.photo.type !== "image/png") {
                 this.isValidPhoto = false;
                 isValid = false;
                 this.photoErrorMessage = "Photo must be either in PNG or JPEG format.";

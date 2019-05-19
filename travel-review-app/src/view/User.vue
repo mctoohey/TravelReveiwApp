@@ -6,9 +6,9 @@
                 <b-card-title style="margin-top: 20px">{{user.givenName}} {{user.familyName}}</b-card-title>
                 <b-card class="text-left" style="margin-bottom: 20px">
                     <p><b>Username:</b> {{user.username}}</p>
-                    <p v-if="user.email != null"><b>Email:</b> {{user.email}}</p>
+                    <p v-if="user.email !== null"><b>Email:</b> {{user.email}}</p>
                 </b-card>
-                <b-button v-if="user.email != null" :to="`/users/${this.$route.params.userId}/edit`" style="float: right">Edit Profile</b-button>
+                <b-button v-if="user.email !== null" :to="`/users/${this.$route.params.userId}/edit`" style="float: right">Edit Profile</b-button>
             </b-card>
         </b-container>
     </div>

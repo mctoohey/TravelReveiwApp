@@ -41,7 +41,7 @@ export default {
     methods: {
         shouldDisplaySignIn: function() {
             // TODO: Use a constant.
-            return this.$route.path != "/signin" && this.$route.path != '/signup' && !this.userSignedIn;
+            return this.$route.path !== "/signin" && this.$route.path !== '/signup' && !this.userSignedIn;
         },
         signOut: function() {
             Api.requestSignOut().then((response) => {
@@ -74,10 +74,10 @@ export default {
     },
     computed: {
         userSignedIn() {
-            return this.$store.getters.userSignedIn && this.$store.state.signedInUser != null;
+            return this.$store.getters.userSignedIn && this.$store.state.signedInUser !== null;
         },
         profileBadgeName() {
-            if (this.$store.state.signedInUser != null) {
+            if (this.$store.state.signedInUser !== null) {
                 return this.$store.state.signedInUser.givenName;
             } else {
                 return "Profile";

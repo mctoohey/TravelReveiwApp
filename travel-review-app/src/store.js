@@ -30,10 +30,10 @@ export function createStore() {
         },
         getters: {
             userSignedIn: function(state) {
-                return state.authToken != null;
+                return state.authToken !== null;
             },
             userKey: function(state) {
-                return state.signedInUser != null ? parseInt(state.signedInUser.id) * 100 + state.userChangeStage : null;
+                return state.signedInUser !== null ? parseInt(state.signedInUser.id) * 100 + state.userChangeStage : null;
             }
         }
     });

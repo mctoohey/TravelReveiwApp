@@ -13,14 +13,14 @@
                             <b-card-sub-title>{{ categoryName(venue.categoryId) }}</b-card-sub-title>
                             <b-card-text>{{ venueLocationText(venue) }}</b-card-text>
                             <b-badge pill variant="dark" style="margin: 4px">
-                                <template v-if="venue.meanStarRating != null">
+                                <template v-if="venue.meanStarRating !== null">
                                     <star-rating style="width: 120px; padding: 2px;" iconScale="1.5" :stars="Number(venue.meanStarRating)"></star-rating>
                                 </template>
                                 <span v-else>This venue has no reviews yet.</span>
                             </b-badge>
 
                             <b-badge pill variant="dark">
-                                <template v-if="venue.modeCostRating != null">
+                                <template v-if="venue.modeCostRating !== null">
                                     <cost-rating style="width: 120px;" iconScale="1.5" :costRating="Number(venue.modeCostRating)"></cost-rating>
                                 </template>
                                 <!-- <span v-else>This venue has no reviews yet.</span> -->
@@ -108,6 +108,17 @@ export default {
             for (let city of this.cities) {
                 options.push({value: city, text: city.charAt(0).toUpperCase() + city.slice(1)})
             }
+            options.sort((a, b) => {
+                if (a.value === null) {
+                    return -1;
+                } else if (b.value === null) {
+                    return 1;
+                } else if (a.value === b.value) {
+                    return 0;
+                } else {
+                    return a.value < b.value ? -1 : 1;
+                }
+            });
             return options;
         },
         categoryOptions: function() {
@@ -183,7 +194,7 @@ export default {
         requestParameters: function() {
             let query = {};
             for (let key in this.filterOptions) {
-                if (this.filterOptions[key] != null && this.filterOptions[key] != '') {
+                if (this.filterOptions[key] !== null && this.filterOptions[key] !== '') {
                     query[key] = this.filterOptions[key];
                 }
             }
@@ -231,7 +242,7 @@ export default {
             return name;
         },
         venueImageSrc(venue) {
-            if (venue.primaryPhoto != null) {
+            if (venue.primaryPhoto !== null) {
                 return Api.getVenuePhotoUrl(venue.venueId, venue.primaryPhoto);
             } else {
                 return require('../assets/DefaultImage.png');

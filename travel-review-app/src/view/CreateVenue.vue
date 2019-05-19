@@ -50,7 +50,7 @@
                                     <b-button-group style="margin-bottom: 10px" :id="`photo${i}`" size="sm" v-bind:key="i*totalNumberPhotos+primaryPhoto">
                                         <b-button :pressed="true" style="outline: none; box-shadow: none; cursor: default;" variant="light">Photo #{{ i }}</b-button>
                                         <b-button @click="removePhoto(i-1)" variant="danger">Remove</b-button>
-                                        <b-button @click="primaryPhoto=i" :variant="i != primaryPhoto ? 'outline-primary' : 'primary'">{{i != primaryPhoto ? 'Make Primary' :  'Primary Photo'}}</b-button>
+                                        <b-button @click="primaryPhoto=i" :variant="i !== primaryPhoto ? 'outline-primary' : 'primary'">{{i !== primaryPhoto ? 'Make Primary' :  'Primary Photo'}}</b-button>
                                     </b-button-group>
                                     <b-badge v-if="editing && i-1 >= existingVenuePhotos.length" variant="success" v-bind:key="'badge'+i*totalNumberPhotos+primaryPhoto">New</b-badge>
                                 </template>
@@ -228,7 +228,7 @@ export default {
                     this.isValidPhotos = false;
                     isValid = false;
                     this.photosErrorMessage = "One of the selected photos was over 20 MB.";
-                } else if (photo.type != "image/jpeg" && photo.type != "image/png") {
+                } else if (photo.type !== "image/jpeg" && photo.type !== "image/png") {
                     this.isValidPhotos = false;
                     isValid = false;
                     this.photosErrorMessage = "Photos must be either in PNG or JPEG format.";
@@ -255,7 +255,7 @@ export default {
                 this.primaryPhoto -= 1;
             }
         },
-        getPreview: function(index) {
+        getPreview(index) {
             if (index < this.existingVenuePhotos.length) {
                 return Api.getVenuePhotoUrl(this.editVenueId, this.existingVenuePhotos[index].photoFilename);
             } else if (index < this.totalNumberPhotos) {
@@ -269,22 +269,23 @@ export default {
             return `${files.length} photos selected`;
         },
         validateInput() {
-            this.isValidVenueName =  this.venue.venueName != "";
-            this.isValidCategory = this.venue.categoryId != null;
-            this.isValidShortDescription = this.venue.shortDescription != "";
-            this.isValidCity = this.venue.city != "";
-            this.isValidAddress = this.venue.address != "";
-            this.isValidLatitude = this.venue.latitude != "" && -90 <= Number(this.venue.latitude) && Number(this.venue.latitude) <= 90;
-            this.isValidLongitude = this.venue.longitude != "" && -180 <= Number(this.venue.longitude) && Number(this.venue.longitude) <= 180;
+            console.log(Number(this.venue.latitude))
+            this.isValidVenueName =  this.venue.venueName !== "";
+            this.isValidCategory = this.venue.categoryId !== null;
+            this.isValidShortDescription = this.venue.shortDescription !== "";
+            this.isValidCity = this.venue.city !== "";
+            this.isValidAddress = this.venue.address !== "";
+            this.isValidLatitude = this.venue.latitude !== "" && -90 <= Number(this.venue.latitude) && Number(this.venue.latitude) <= 90;
+            this.isValidLongitude = this.venue.longitude !== "" && -180 <= Number(this.venue.longitude) && Number(this.venue.longitude) <= 180;
             return (this.isValidVenueName && this.isValidCategory && this.isValidShortDescription && this.isValidShortDescription && this.isValidCity && this.isValidAddress && this.isValidLatitude && this.isValidLongitude);
         },
         hasVenueChanged() {
             for (let key in this.originalVenue) {
-                if (this.originalVenue[key] != this.venue[key]) {
+                if (this.originalVenue[key] !== this.venue[key]) {
                     return true;
                 }
             }
-            if (this.originalVenuePhotos.length != this.existingVenuePhotos.length || this.addedPhotos.length > 0 || this.originalPrimaryPhoto != this.primaryPhoto) {
+            if (this.originalVenuePhotos.length !== this.existingVenuePhotos.length || this.addedPhotos.length > 0 || this.originalPrimaryPhoto !== this.primaryPhoto) {
                 return true;
             }
             return false;

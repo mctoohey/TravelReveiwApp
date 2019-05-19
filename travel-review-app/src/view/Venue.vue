@@ -1,5 +1,5 @@
 <template>
-    <div v-if="venue != null">
+    <div v-if="venue !== null">
         <b-row style="margin-top: 30px">
             <b-col style="padding-left: 50px">
                 <b-card :title="venue.venueName" style="height: 100%">
@@ -13,17 +13,26 @@
                         :content="venue.category.categoryDescription"
                             ></b-popover><h6>{{ venue.category.categoryName }}</h6></b-badge>
                     </b-card-sub-title>
-                    <b-list-group style="margin-top: 20px; margin-bottom: 20px">
-                        <b-list-group-item>City: {{ venue.city }}</b-list-group-item>
-                        <b-list-group-item>Address: {{ venue.address }}</b-list-group-item>
-                    </b-list-group>
-                    <b-card>
-                        <b-card-sub-title>Description<span v-if="venue.longDescription != ''"><b-button v-b-toggle.descriptionCollapse style="float: right" variant="link"><v-icon :name="descriptionExpanded ? 'chevron-down':'chevron-right'" scale="1.5"/></b-button></span></b-card-sub-title>
-                        <b-card-text>{{ venue.shortDescription }}</b-card-text>
-                        <b-collapse id="descriptionCollapse" v-model="descriptionExpanded">
-                            <b-card-text>{{ venue.longDescription }}</b-card-text>
-                        </b-collapse>
-                    </b-card>
+                        <b-card style="margin-top: 15px; margin-bottom: 15px">
+                            <b-card-sub-title>Description<span v-if="venue.longDescription !== ''"><b-button v-b-toggle.descriptionCollapse style="float: right" variant="link"><v-icon :name="descriptionExpanded ? 'chevron-down':'chevron-right'" scale="1.5"/></b-button></span></b-card-sub-title>
+                            <b-card-text>{{ venue.shortDescription }}</b-card-text>
+                            <b-collapse id="descriptionCollapse" v-model="descriptionExpanded">
+                                <b-card-text>{{ venue.longDescription }}</b-card-text>
+                            </b-collapse>
+                        </b-card>
+                        <div>
+                            <b-badge pill variant="dark" style="margin: 0;">
+                                <star-rating style="width: 120px; padding: 2px;" iconScale="1.5" :stars="Number(meanStarRating)"></star-rating>
+                            </b-badge>
+                            <b-badge pill variant="dark" style="margin-right: 0px;">
+                                <cost-rating style="width: 120px;" iconScale="1.5" :costRating="Number(modeCostRating)"></cost-rating>
+                            </b-badge>
+                        </div>
+                        <b-list-group style="margin-top: 20px; margin-bottom: 20px;">
+                            <b-list-group-item>City: {{ venue.city }}</b-list-group-item>
+                            <b-list-group-item>Address: {{ venue.address }}</b-list-group-item>
+                        </b-list-group>
+                    
                 <b-card style="margin-top: 20px;">
                     <b-card-text>Added by <a :href="`/users/${venue.admin.userId}`">{{ venue.admin.username }}</a> on {{ venue.dateAdded | formatDate }}</b-card-text>
                 </b-card>
@@ -148,6 +157,8 @@ export default {
             reviews: [],
             descriptionExpanded: false,
             postReviewExpanded: false, 
+            meanStarRating: null,
+            modeCostRating: null,
 
             userReview: {
                 reviewBody: "",
@@ -175,20 +186,40 @@ export default {
         getReviews(venueId) {
             Api.requestVenueReviews(venueId).then((response) => {
                 this.reviews = response.data;
-                if (this.$store.getters.userSignedIn) {
+                if (this.reviews.length > 0) {
                     let i = 0;
                     let userReviewIndex = -1;
+                    let starSum = 0;
+                    let costRatingMode = "-1";
+                    let costRatingFrequencies = {"-1": -1};
+                    let numReviews = this.reviews.length;
                     for (let review of this.reviews) {
-                        if (parseInt(review.reviewAuthor.userId) === parseInt(this.$store.state.signedInUser.id)) {
+                        if (this.$store.state.signedInUser !== null && parseInt(review.reviewAuthor.userId) === parseInt(this.$store.state.signedInUser.id)) {
                             this.userReview = review;
                             this.userHasReview = true;
                             userReviewIndex = i;
+                        }
+                        starSum += review.starRating;
+                        if (costRatingFrequencies.hasOwnProperty(review.costRating)) {
+                            costRatingFrequencies[review.costRating] += 1;
+                        } else {
+                            costRatingFrequencies[review.costRating] = 1;
+                        }
+
+                        if (costRatingFrequencies[review.costRating] > costRatingFrequencies[costRatingMode]) {
+                            costRatingMode = review.costRating;
                         }
                         i += 1;
                     }
                     if (userReviewIndex > -1) {
                         this.reviews.splice(userReviewIndex, 1);
                     }
+                    console.log(costRatingFrequencies)
+                    this.meanStarRating = starSum / numReviews;
+                    this.modeCostRating = costRatingMode;
+                } else {
+                    this.meanStarRating = null;
+                    this.modeCostRating = null;
                 }
             }).catch((error) => {
                 // TODO: Handle error.
@@ -235,7 +266,7 @@ export default {
             }
         },
         adminView: function() {
-            return this.$store.state.signedInUser != null && parseInt(this.$store.state.signedInUser.id) === parseInt(this.venue.admin.userId);
+            return this.$store.state.signedInUser !== null && parseInt(this.$store.state.signedInUser.id) === parseInt(this.venue.admin.userId);
         }
     },
     filters: {

@@ -52,14 +52,14 @@ export default {
     },
     methods: {
         signUp: function() {
-            this.isValidFirstName = this.firstName != "";
-            this.isValidLastName = this.lastName != "";
-            this.isValidUsername = this.username != "" && this.username.length <= 64 && /^[0-9a-zA-Z]+$/.test(this.username);
+            this.isValidFirstName = this.firstName !== "";
+            this.isValidLastName = this.lastName !== "";
+            this.isValidUsername = this.username !== "" && this.username.length <= 64 && /^[0-9a-zA-Z]+$/.test(this.username);
 
             let emailRe = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
             this.isValidEmail = emailRe.test(this.email);
 
-            this.isValidPassword = this.password != "";
+            this.isValidPassword = this.password !== "";
             this.isValidPasswordReentry = this.password === this.passwordReentry;
 
             if (!this.isValidPassword) {
