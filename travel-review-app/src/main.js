@@ -6,6 +6,7 @@ import { initApi, Api } from './api.js';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
+import "regenerator-runtime/runtime";
 
 import VueResource from 'vue-resource';
 Vue.use(VueResource);

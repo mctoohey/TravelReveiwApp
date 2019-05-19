@@ -43,8 +43,8 @@
             <b-col style="padding-top: 0px; padding-left: 10px; padding-right: 10px;">
                 <b-card title="Photos" style="height: 100%;">
                     <div style="">
-                    <b-carousel v-if="venue.photos.length > 0" :interval="4000" controls indicators style="text-shadow: 1px 1px 2px #333;" class="text-center">
-                        <b-carousel-slide v-for="photo in venue.photos" v-bind:key="photo.photoFilename" style="border: 4px solid gray; border-radius: 25px;" background="black">
+                    <b-carousel v-if="venue.photos.length > 0" :interval="4000" controls indicators style="text-shadow: 1px 1px 2px #333; border: 4px solid gray; border-radius: 25px; overflow: hidden;" class="text-center">
+                        <b-carousel-slide v-for="photo in venue.photos" v-bind:key="photo.photoFilename" style="" background="black">
                             <img :src="getPhotoUrl(photo.photoFilename)" style="object-fit: contain;" slot="img" height="480" width="800">
                         </b-carousel-slide>
                     </b-carousel>

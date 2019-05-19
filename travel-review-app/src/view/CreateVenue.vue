@@ -191,11 +191,10 @@ export default {
             if (this.validateInput()) {
                 this.venue.latitude = Number(this.venue.latitude);
                 this.venue.longitude = Number(this.venue.longitude);
-                Api.requestEditVenue(this.editVenueId, this.venue).then((response) => {
-                    this.$router.push(`/venues/${this.editVenueId}`);
-                    let photoNumber = 1;
+                Api.requestEditVenue(this.editVenueId, this.venue).then(async (response) => {
+                    let photoNumber = this.existingVenuePhotos.length + 1;
                     for (let photo of this.addedPhotos) {
-                        Api.requetsAddVenuePhoto(this.editVenueId, photo, photoNumber === this.primaryPhoto, "").then().catch((error) => {
+                        await Api.requetsAddVenuePhoto(this.editVenueId, photo, photoNumber === this.primaryPhoto, "").then().catch((error) => {
                             // TODO: Handle error;
                             console.log(error);
                         });
@@ -203,18 +202,19 @@ export default {
                     }
                     for (let photo of this.originalVenuePhotos) {
                         if (!this.existingVenuePhotos.some(item => item.photoFilename === photo.photoFilename)) {
-                            Api.requestRemoveVenuePhoto(this.editVenueId, photo.photoFilename).catch((error) => {
+                            await Api.requestRemoveVenuePhoto(this.editVenueId, photo.photoFilename).catch((error) => {
                                 // TODO: Handle error;
                                 console.log(error);
                             });
                         }
                     }
-                    if (this.primaryPhoto-1 < this.existingVenuePhotos) {
-                        Api.requestSetPrimaryVenuePhoto(this.editVenueId, this.existingVenuePhotos[this.primaryPhoto-1].photoFilename).catch((error) => {
+                    if (this.primaryPhoto-1 < this.existingVenuePhotos.length) {
+                        await Api.requestSetPrimaryVenuePhoto(this.editVenueId, this.existingVenuePhotos[this.primaryPhoto-1].photoFilename).catch((error) => {
                             // TODO: Handle error;
                             console.log(error);
                         });
                     }
+                    this.$router.push(`/venues/${this.editVenueId}`);
                 }).catch((error) => {
                     // TODO: Handle error.
                     console.log(error);
