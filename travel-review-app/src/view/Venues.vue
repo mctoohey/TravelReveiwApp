@@ -38,6 +38,7 @@
         </b-col>
         <b-col cols="3" :style="{'background-color': '#F2F2F2', 'padding-right': '0', 'padding-left': '0'}">
             <b-container fluid>
+                <h3 style="margin-top: 20px">Filter Options</h3>
                 <b-form-group label="Search">
                     <b-form-input v-model="filterOptions.q" placeholder="Name" value="String"></b-form-input>
                 </b-form-group>
@@ -58,7 +59,8 @@
                     <b-form-input v-model="maxCostRating" type="range" min="0" max="4"></b-form-input>
                     <cost-rating iconScale="2" :costRating="Number(maxCostRating)"></cost-rating>
                 </b-form-group>
-                <b-button @click="search()" style="margin-bottom: 20px">Search</b-button>
+                <b-button @click="search()" style="margin-bottom: 20px" variant="primary">Apply Filter</b-button>
+                <b-button @click="resetFilter()" style="margin-bottom: 20px; float: right" variant="dark">Reset Filter</b-button>
                 <b-alert v-model="errorFlag" dismissible variant="danger">{{ errorMessage }}</b-alert>
             </b-container>
         </b-col>
@@ -265,6 +267,16 @@ export default {
                 return venue.city;
             }
 
+        },
+        resetFilter() {
+            this.filterOptions= {
+                "city": null,
+                "categoryId": null,
+                "q": null
+            };
+            this.minStarRating = 0;
+            this.maxCostRating = 4;
+            this.selectedSortBy = ["STAR_RATING", false];
         }
     },
     components: {
