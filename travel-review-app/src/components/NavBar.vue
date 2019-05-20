@@ -7,7 +7,6 @@
             <b-collapse id="nav-collapse" is-nav>
                 <b-navbar-nav>
                     <b-nav-item to="/venues">Venues</b-nav-item>
-                    <b-nav-item to="/">Users</b-nav-item>
                 </b-navbar-nav>
 
                 <b-navbar-nav class="ml-auto">
@@ -74,6 +73,7 @@ export default {
     },
     computed: {
         userSignedIn() {
+            console.log(this.$store.getters.userSignedIn && this.$store.state.signedInUser !== null)
             return this.$store.getters.userSignedIn && this.$store.state.signedInUser !== null;
         },
         profileBadgeName() {

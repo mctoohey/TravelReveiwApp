@@ -90,6 +90,10 @@ if ($cookies.isKey('authToken') && $cookies.isKey('userId')) {
                     router.push('/');
                 }
             }).catch((error) => {
+                store.commit('signUserOut');
+                $cookies.remove('authToken');
+                $cookies.remove('userId');
+                router.push('/');
                 // TODO: Handle error.
                 console.log(error);
             });

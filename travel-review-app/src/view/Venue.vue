@@ -246,7 +246,12 @@ export default {
             this.userReview.costRating = parseInt(this.userReview.costRating);
             this.userReview.starRating = parseInt(this.userReview.starRating);
             if (this.userReview.reviewBody.length > 0) {
-                Api.requestPostVenueReview(this.$route.params.venueId, this.userReview);
+                Api.requestPostVenueReview(this.$route.params.venueId, this.userReview).then((response) => {
+                    this.getReviews(this.$route.params.venueId);
+                }).catch((error) => {
+                    // TODO: Potentially handle error.
+                    console.log(error);
+                });
             } else {
                 this.isValidReviewBody = false;
             }
