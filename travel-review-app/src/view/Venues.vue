@@ -8,7 +8,7 @@
                 <b-container fluid>
                     <h4><b-badge pill variant="light">Showing venues {{venuesStartIndex}} to {{venuesEndIndex}}</b-badge></h4>
                     <b-container fluid style="margin-bottom: 20px" v-for="venue in this.displayedVenues" v-bind:key="venue.venueId">
-                        <b-card :img-src="venueImageSrc(venue)" img-alt="Image not found" img-right img-height="150">
+                        <b-card :img-src="venueImageSrc(venue)" img-alt="Image not found" img-right img-height="175">
                             <b-card-title ><b-link :to="`/venues/${venue.venueId}`" class="card-link">{{ venue.venueName }}</b-link><b-button v-if="isAdminPage" :to="`/venues/${venue.venueId}/edit`" size="sm" variant="outline-success" style="margin-left: 15px; padding-top: 0px; padding-bottom: 0px">Edit</b-button></b-card-title>
                             <b-card-sub-title>{{ categoryName(venue.categoryId) }}</b-card-sub-title>
                             <b-card-text>{{ venueLocationText(venue) }}</b-card-text>

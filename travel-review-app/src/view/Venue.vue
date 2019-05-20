@@ -192,8 +192,9 @@ export default {
                     let i = 0;
                     let userReviewIndex = -1;
                     let starSum = 0;
-                    let costRatingMode = "-1";
-                    let costRatingFrequencies = {"-1": -1};
+                    let costRatingMode = this.reviews[0].costRating;
+                    let costRatingFrequencies = {};
+                    costRatingFrequencies[this.reviews[0].costRating] = 0;
                     let numReviews = this.reviews.length;
                     for (let review of this.reviews) {
                         if (this.$store.state.signedInUser !== null && parseInt(review.reviewAuthor.userId) === parseInt(this.$store.state.signedInUser.id)) {
@@ -208,7 +209,7 @@ export default {
                             costRatingFrequencies[review.costRating] = 1;
                         }
 
-                        if (costRatingFrequencies[review.costRating] > costRatingFrequencies[costRatingMode]) {
+                        if (costRatingFrequencies[review.costRating] >= costRatingFrequencies[costRatingMode] && review.costRating < costRatingMode) {
                             costRatingMode = review.costRating;
                         }
                         i += 1;
