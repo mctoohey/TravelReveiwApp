@@ -90,7 +90,7 @@
                                 </b-row>
                             </template>
                             <template v-else>
-                                <b-card-sub-title>{{ userReview.reviewAuthor.username }}<span style="float: right">{{ userReview.timePosted | formatDate}} at {{ userReview.timePosted | formatTime }}</span></b-card-sub-title>
+                                <b-card-sub-title><a :href="`/users/${userReview.reviewAuthor.userId}`">{{ userReview.reviewAuthor.username }}</a><span style="float: right">{{ userReview.timePosted | formatDate}} at {{ userReview.timePosted | formatTime }}</span></b-card-sub-title>
                                 <b-card-body style="padding: 15px;">
                                     <b-row>
                                         <b-col style="padding: 0px;">
@@ -263,7 +263,7 @@ export default {
             if (this.userHasReview && !this.postReviewExpanded) {
                 return "View my review";
             } else if (this.userHasReview && this.postReviewExpanded) {
-                return "Close";
+                return "Hide my review";
             } else if (this.$store.getters.userSignedIn && !this.postReviewExpanded) {
                 return "Post a review";
             } else if (this.$store.getters.userSignedIn && this.postReviewExpanded) {
