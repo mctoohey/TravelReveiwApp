@@ -61,6 +61,11 @@ export default {
             this.errorFlag = true;
             this.errorMessage = message;
         }
-    }
+    },
+    mounted() {
+        if (this.$store.getters.userSignedIn) {
+            this.$router.push('/');
+        }
+    },
 }
 </script>

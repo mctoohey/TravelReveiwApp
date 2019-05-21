@@ -188,6 +188,7 @@ export default {
         getVenues(requestParams) {
             Api.requestVenues(requestParams).then((response) => {
                 this.venues = response.data;
+                this.currentPage = 1;
             }).catch((error) => {
                 // TODO: Handle error.
                 console.log(error);
