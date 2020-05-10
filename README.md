@@ -1,3 +1,18 @@
-# SENG365 Assignment 2
+# travel-review-app
 
-Git repository for SENG365 assignment 2 on implementing a web client for the travel app API developed in assignment 1. 
+> App for a travel review site.
+
+## Build Setup
+
+``` bash
+# install dependencies
+npm install
+
+# serve with hot reload at localhost:8080
+npm run dev
+
+# build for production with minification
+npm run build
+```
+
+For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
