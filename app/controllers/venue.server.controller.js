@@ -123,7 +123,7 @@ exports.addPhoto = function(req, res) {
     let validFileExtensions = ['png', 'jpeg', 'jpg'];
 
     let isValidValues = true;
-    isValidValues = isValidValues && req.body.hasOwnProperty('description') && req.body['description'].length > 0;
+    isValidValues = isValidValues && req.body.hasOwnProperty('description');
     isValidValues = isValidValues && req.body.hasOwnProperty('makePrimary') && ['true', 'false'].includes(req.body['makePrimary'].toLowerCase());
     if (isValidValues) {
         let photoDescription = req.body['description'];
@@ -140,7 +140,7 @@ exports.addPhoto = function(req, res) {
         }
 
         let photoExtension = photoFileName.split('.')[photoFileName.split('.').length-1];
-        if (!validFileExtensions.includes(photoExtension)) {
+        if (!validFileExtensions.includes(photoExtension.toLowerCase())) {
             res.status(400);
             res.json({"ERROR": "Not a valid file extension, must be '.png', '.jpg' or '.jpeg'"});
             return;

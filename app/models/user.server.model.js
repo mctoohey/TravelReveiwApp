@@ -7,11 +7,11 @@ exports.insert = function(username, email, givenName, familyName, password, done
     
     let values = [username, email, givenName, familyName, hashPassword(password)];
 
-    db.getPool().query('INSERT INTO User (username, email, given_name, family_name, password) VALUES ?', [[values]], function(err, result) {
+    db.getPool().run('INSERT INTO User (username, email, given_name, family_name, password) VALUES ?', [[values]], function(err) {
         if (err) {
             done(400, err);
         } else {
-            done(201, {"userId": result.insertId});
+            done(201, {"userId": this.lastID});
         }
     });
 }
@@ -29,7 +29,7 @@ exports.update = function(id, token, updatedInfo, done) {
         } else if (rows[0].user_id != id) {
             done(403, {})
         } else {
-            db.getPool().query('UPDATE User SET ? WHERE user_id = ?', [updatedInfo, id], function(err, result) {
+            db.getPool().run('UPDATE User SET ? WHERE user_id = ?', [updatedInfo, id], function(err) {
                 if (err) {
                     done(400, err);
                 } else {
@@ -102,7 +102,7 @@ function authenticate(uniqueSelectCondition, password, done) {
                     "token": token
                 }
 
-                db.getPool().query('UPDATE User SET auth_token = ? WHERE user_id = ?', [authResult.token, authResult.userId], function(err, result) {
+                db.getPool().run('UPDATE User SET auth_token = ? WHERE user_id = ?', [authResult.token, authResult.userId], function(err) {
                     if (err) {
                         done(400, err);
                     } else {
@@ -117,12 +117,12 @@ function authenticate(uniqueSelectCondition, password, done) {
 }
 
 exports.logout = function(token, done) {
-    db.getPool().query('UPDATE User SET auth_token = null WHERE auth_token = ?', token, function(err, result) {
+    db.getPool().run('UPDATE User SET auth_token = null WHERE auth_token = ?', token, function(err) {
         if (err) {
             done(401, err);
-        } else if (result.affectedRows === 0) {
+        } else if (this.changes === 0) {
             done(401, {"Error": "Token not found"});
-        } else if (result.affectedRows > 1) {
+        } else if (this.changes > 1) {
             // Should users still be logged out here?
             done(401, {"Error": "Token should be unique to one user"});
         } else {
@@ -152,7 +152,7 @@ exports.addPhoto = function(id, token, imageName, imageRaw, done) {
                 } else {
                     let statusCode = 200;
                     if (rows[0].profile_photo_filename === null) statusCode = 201;
-                    db.getPool().query('UPDATE User SET profile_photo_filename = ? WHERE user_id = ?', [imageName, id], function(err, result) {
+                    db.getPool().run('UPDATE User SET profile_photo_filename = ? WHERE user_id = ?', [imageName, id], function(err) {
                         if (err) {
                             done(500, err);
                         } else {
@@ -204,7 +204,7 @@ exports.deletePhoto = function(id, token, done) {
         } else if (rows[0].profile_photo_filename === null) {
             done(404, {"ERROR": "Image not found"});
         } else {
-            db.getPool().query('UPDATE User SET profile_photo_filename = null WHERE user_id = ?', id, function(err, result) {
+            db.getPool().run('UPDATE User SET profile_photo_filename = null WHERE user_id = ?', id, function(err) {
                 if (err) {
                     done(500, err);
                 } else {

@@ -51,11 +51,11 @@ exports.insert = function(venueName, categoryId, city, shortDescription, longDes
                 } else if (rows.length > 1) {
                     done(500, {"ERROR": "Venue category id should be unique"});
                 } else {
-                    db.getPool().query('INSERT INTO Venue (venue_name, category_id, city, short_description, long_description, address, latitude, longitude, admin_id, date_added) VALUES ?', [[values]], function(err, result) {
+                    db.getPool().run('INSERT INTO Venue (venue_name, category_id, city, short_description, long_description, address, latitude, longitude, admin_id, date_added) VALUES ?', [[values]], function(err) {
                         if (err) {
                             done(400, err);
                         } else {
-                            done(201, {"venueId": result.insertId});
+                            done(201, {"venueId": this.lastID});
                         }
                     });
                 }
@@ -66,7 +66,7 @@ exports.insert = function(venueName, categoryId, city, shortDescription, longDes
 
 exports.update = function(id, token, updatedInfo, done) {
     adminOnlyAction(id, token, done, function() {
-        db.getPool().query('UPDATE Venue SET ? WHERE venue_id = ?', [updatedInfo, id], function(err, result) {
+        db.getPool().run('UPDATE Venue SET ? WHERE venue_id = ?', [updatedInfo, id], function(err) {
             if (err) {
                 done(500, err);
             } else {
@@ -274,11 +274,12 @@ function processQueryRows(venueRows, constraints, result, done) {
 }
 
 exports.readCategories = function (done) {
-    db.getPool().query('SELECT * FROM VenueCategory', function(err, rows) {
+    db.getPool().query('SELECT * FROM VenueCategory', [], function(err, rows) {
         if (err) {
             done(500, err);
         } else {
-            let categories = []
+            console.log(rows);
+            let categories = [];
             for (let row of rows) {
                 categories.push({"categoryId": row.category_id,
                                  "categoryName": row.category_name,
@@ -303,7 +304,7 @@ exports.insertPhoto = function(venueId, photoFilename, photoDescription, isPrima
                 let primaryValue = 0;
                 if (isPrimary) {
                     primaryValue = 1;
-                    db.getPool().query('UPDATE VenuePhoto SET is_primary = 0 WHERE venue_id = ?', venueId, function(err, result) {
+                    db.getPool().run('UPDATE VenuePhoto SET is_primary = 0 WHERE venue_id = ?', venueId, function(err) {
                         if (err) {
                             done(500, err);
                         } else {
@@ -319,7 +320,7 @@ exports.insertPhoto = function(venueId, photoFilename, photoDescription, isPrima
 }
 
 function insertPhotoValuesIntoDatabase(values, doneError, doneSuccess) {
-    db.getPool().query('INSERT INTO VenuePhoto (venue_id, photo_filename, photo_description, is_primary) VALUES ?', [[values]], function(err, result) {
+    db.getPool().run('INSERT INTO VenuePhoto (venue_id, photo_filename, photo_description, is_primary) VALUES ?', [[values]], function(err) {
         if (err) {
             doneError(400, err);
         } else {
@@ -369,7 +370,7 @@ exports.deletePhoto = function(venueId, photoFilename, token, done) {
                 i += 1;
             }
             if (isPrimary) {
-                db.getPool().query('UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? and photo_filename = ?', [venueId, newPrimaryFileName], function(err, result) {
+                db.getPool().run('UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? and photo_filename = ?', [venueId, newPrimaryFileName], function(err) {
                     if (err) {
                         done(500, err);
                     } else {
@@ -403,13 +404,13 @@ function deletePhotoFromDatabase(venueId, photoFilename, done) {
 
 exports.setPrimaryPhoto = function(venueId, photoFilename, token, done) {
     adminOnlyAction(venueId, token, done, function() {
-        db.getPool().query('UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? and photo_filename = ?', [venueId, photoFilename], function(err, result) {
+        db.getPool().run('UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? and photo_filename = ?', [venueId, photoFilename], function(err) {
             if (err) {
                 done(500, err);
-            } else if (result.affectedRows === 0) {
+            } else if (this.changes === 0) {
                 done(404, {"ERROR": "Could not find photo"});
             } else {
-                db.getPool().query('UPDATE VenuePhoto SET is_primary = 0 WHERE venue_id = ? and photo_filename != ?', [venueId, photoFilename], function(err, result) {
+                db.getPool().run('UPDATE VenuePhoto SET is_primary = 0 WHERE venue_id = ? and photo_filename != ?', [venueId, photoFilename], function(err) {
                     if (err) {
                         done(500, err);
                     } else {
@@ -446,7 +447,7 @@ exports.insertReview = function(venueId, reviewBody, starRating, costRating, tok
                         } else {
                             let dateTime = new Date(Date.now()).toISOString();
                             let values = [venueId, reviewBody, userId, starRating, costRating, dateTime];
-                            db.getPool().query('INSERT INTO Review (reviewed_venue_id, review_body, review_author_id, star_rating, cost_rating, time_posted) VALUES ?', [[values]], function(err, result) {
+                            db.getPool().run('INSERT INTO Review (reviewed_venue_id, review_body, review_author_id, star_rating, cost_rating, time_posted) VALUES ?', [[values]], function(err) {
                                 if (err) {
                                     done(400, err);
                                 } else {
@@ -511,7 +512,7 @@ function processReviewQueryRows(reviewRows, result, done) {
 }
 
 function adminOnlyAction(venueId, token, done, action) {
-    db.getPool().query('SELECT * FROM User LEFT JOIN Venue ON user_id = admin_id WHERE (auth_token = ? or venue_id = ?)', [token, venueId], function(err, rows) {
+    db.getPool().query('SELECT * FROM User LEFT JOIN Venue ON user_id = admin_id WHERE (auth_token = ? and venue_id = ?)', [token, venueId], function(err, rows) {
         if (err) {
             done(500, err);
         } else if (rows.length === 0) {

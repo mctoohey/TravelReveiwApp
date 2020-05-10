@@ -1,17 +1,36 @@
-const mysql = require('promise-mysql');
+const sqlite3 = require('sqlite3').verbose();
+const mysql = require('mysql');
 
-let pool = null;
-
-exports.createPool = async function () {
-    pool = mysql.createPool({
-        multipleStatements: true,
-        host: process.env.SENG365_MYSQL_HOST,
-        user: process.env.SENG365_MYSQL_USER,
-        password: process.env.SENG365_MYSQL_PASSWORD,
-        database: process.env.SENG365_MYSQL_DATABASE
-    });
-};
+// open the database
+let db = new sqlite3.Database('./data.sqlite', sqlite3.OPEN_READWRITE, (err) => {
+  if (err) {
+    console.error(err.message);
+  } else {
+    console.log('Connected to the travel review database.');
+  }
+});
 
 exports.getPool = function () {
-    return pool;
+    return {
+        query: (sql, values, ...args) => {
+                if (values) {
+                    sql = mysql.format(sql, values);
+                }
+                console.log(sql);
+                return db.all(sql, ...args);
+            },
+        run: (sql, values, ...args) => {
+                if (values) {
+                    sql = mysql.format(sql, values);
+                }
+                console.log(sql);
+                return db.run(sql, ...args);
+            },
+        exec: (sql, values, ...args) => {
+            if (values) {
+                sql = mysql.format(sql, values);
+            }
+            return db.exec(sql, ...args);
+        }
+        };
 };
